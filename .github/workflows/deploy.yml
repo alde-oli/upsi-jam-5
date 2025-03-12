@@ -43,6 +43,11 @@ jobs:
           mkdir -p build/web
           godot --headless --export-release "Web" ./build/web/index.html || exit 1
           ls -la build/web
+          # S'assurer que le répertoire n'est pas vide
+          if [ -z "$(ls -A build/web)" ]; then
+            echo "Build directory is empty, export failed!"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -50,11 +55,13 @@ jobs:
           name: web-build
           path: build/web
           retention-days: 1
+          if-no-files-found: error
 
   deploy_to_itchio:
     name: Deploy to itch.io
     runs-on: ubuntu-latest
     needs: export_game
+    if: success()
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
