@@ -13,3 +13,34 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# Fichiers d'export Godot
+*.html
+*.js
+*.wasm
+*.pck
+*.audio.worklet.js
+
+# Ignorer les icônes générées, mais pas celles qui sont dans le projet
+/*.icon.png
+/*.apple-touch-icon.png
+/*.png
+
+# Imports de Godot
+*.png.import
+*.icon.png.import
+*.apple-touch-icon.png.import
+
+# Dossiers d'export
+/build/
+/dist/
+/export/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de Godot
+.godot/
+*.translation
+export_presets.cfg.example
