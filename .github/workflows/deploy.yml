@@ -1,16 +1,119 @@
-name: "Deploy to itch.io"
+name: "Godot Game Pipeline"
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths-ignore:
       - '**.md'
       - '.gitignore'
       - 'LICENSE'
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      deploy_to_itchio:
+        description: 'Deploy to itch.io'
+        required: false
+        default: false
+        type: boolean
+      run_tests:
+        description: 'Override RUN_TESTS setting'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - 'true'
+          - 'false'
+
+env:
+  # Utilise la variable du repository, avec possibilité de l'outrepasser via workflow_dispatch
+  RUN_TESTS: ${{ github.event.inputs.run_tests || vars.RUN_TESTS || 'true' }}
 
 jobs:
-  export_and_deploy:
-    name: Export & Deploy
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Run GDScript linting
+        run: |
+          mkdir -p reports
+          godot --headless --script addons/gdlint/gdlint.gd > reports/lint-report.txt || true
+          cat reports/lint-report.txt
+
+      - name: Upload lint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: reports/lint-report.txt
+          retention-days: 7
+      
+      - name: Discord notification
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "❌ Linting Failed"
+          description: |
+            Linting job failed on branch ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          color: 0xFF0000
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    if: env.RUN_TESTS == 'true'
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Setup directories
+        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/ reports
+
+      - name: Run GUT tests
+        run: |
+          godot --headless --script addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit || true
+          cp .gut_editor_config.json reports/test-results.json || true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: reports/
+          retention-days: 7
+      
+      - name: Discord notification
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "❌ Tests Failed"
+          description: |
+            Tests job failed on branch ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          color: 0xFF0000
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  export_game:
+    name: Export Game
+    needs: [lint]
+    if: success() || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
@@ -48,7 +151,153 @@ jobs:
           mkdir -p build/web
           godot --headless --export-release "Web" ./build/web/index.html
 
-      - name: Deploy to itch.io
+      - name: Windows Build
+        run: |
+          mkdir -p build/windows
+          godot --headless --export-release "Windows Desktop" ./build/windows/${GITHUB_REPOSITORY##*/}.exe
+
+      - name: Linux Build
+        run: |
+          mkdir -p build/linux
+          godot --headless --export-release "Linux/X11" ./build/linux/${GITHUB_REPOSITORY##*/}
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          retention-days: 7
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows
+          retention-days: 7
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: build/linux
+          retention-days: 7
+
+      - name: Create GitHub release for tags
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/web/**
+            build/windows/**
+            build/linux/**
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Discord notification
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "❌ Export Failed"
+          description: |
+            Export job failed on branch ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          color: 0xFF0000
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  deploy_preview:
+    name: Deploy Preview
+    needs: export_game
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Web build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+
+      - name: Deploy to GitHub Pages for PR review
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          destination_dir: pr-preview/${{ github.event.pull_request.number }}
+          keep_files: true
+
+      - name: Comment on PR with preview link
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const preview_url = `https://${owner}.github.io/${repo}/pr-preview/${issue_number}/`;
+            github.rest.issues.createComment({
+              issue_number: issue_number,
+              owner: owner,
+              repo: repo,
+              body: `✨ PR preview ready! ✨\n\nYou can test this PR at: [${preview_url}](${preview_url})`
+            });
+
+      - name: Discord notification - PR Preview
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "🔍 PR Preview Deployed"
+          description: |
+            PR #${{ github.event.pull_request.number }}: "${{ github.event.pull_request.title }}"
+            
+            Created by: ${{ github.event.pull_request.user.login }}
+            Branch: ${{ github.head_ref }} → ${{ github.base_ref }}
+            
+            [View PR](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})
+            [Play Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-preview/${{ github.event.pull_request.number }}/)
+          color: 0xFFAA00
+          url: ${{ github.event.pull_request.html_url }}
+
+      - name: Discord notification
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "❌ PR Preview Failed"
+          description: |
+            PR preview deployment failed for PR #${{ github.event.pull_request.number }}
+            "${{ github.event.pull_request.title }}"
+            
+            Created by: ${{ github.event.pull_request.user.login }}
+          color: 0xFF0000
+          url: ${{ github.event.pull_request.html_url }}
+
+  deploy_to_itchio:
+    name: Deploy to itch.io
+    needs: export_game
+    if: github.ref == 'refs/heads/main' || github.event.inputs.deploy_to_itchio == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Web build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows
+
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: build/linux
+
+      - name: Deploy Web to itch.io
         uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
@@ -58,3 +307,59 @@ jobs:
           PACKAGE: build/web
           VERSION: ${{ github.sha }}
           BUILD_METADATA: github-${{ github.run_id }}
+
+      - name: Deploy Windows to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: windows
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: build/windows
+          VERSION: ${{ github.sha }}
+          BUILD_METADATA: github-${{ github.run_id }}
+
+      - name: Deploy Linux to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: linux
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: build/linux
+          VERSION: ${{ github.sha }}
+          BUILD_METADATA: github-${{ github.run_id }}
+
+      - name: Discord notification - Itch.io Deployment
+        if: success()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "🎮 New build deployed to itch.io!"
+          description: |
+            A new build has been deployed to itch.io
+            
+            Game: ${{ secrets.ITCH_GAME }}
+            User: ${{ secrets.ITCH_USER }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            
+            [Play Online](https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }})
+          color: 0x44FF44
+          url: https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }}
+
+      - name: Discord notification
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "❌ itch.io Deployment Failed"
+          description: |
+            Deployment to itch.io failed
+            
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          color: 0xFF0000
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
