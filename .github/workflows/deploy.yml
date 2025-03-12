@@ -26,10 +26,6 @@ on:
           - 'true'
           - 'false'
 
-env:
-  # Utilise la variable du repository, avec possibilité de l'outrepasser via workflow_dispatch
-  RUN_TESTS: ${{ github.event.inputs.run_tests || vars.RUN_TESTS || 'true' }}
-
 jobs:
   lint:
     name: Lint Code
@@ -72,7 +68,8 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    if: env.RUN_TESTS == 'true'
+    # Utiliser vars directement dans la condition
+    if: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == '' && vars.RUN_TESTS == 'true') }}
     container:
       image: barichello/godot-ci:4.3
     steps:
