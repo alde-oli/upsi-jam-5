@@ -2,19 +2,17 @@ name: "Deploy to itch.io"
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths-ignore:
       - '**.md'
       - '.gitignore'
       - 'LICENSE'
 
 jobs:
-  export_game:
-    name: Export Game
+  export_and_deploy:
+    name: Export & Deploy
     runs-on: ubuntu-latest
     container:
-      # Update the container to use Godot 4.3
       image: barichello/godot-ci:4.3
     steps:
       - name: Checkout
@@ -23,30 +21,24 @@ jobs:
           lfs: true
           fetch-depth: 0
 
-      - name: Setup
-        run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          mkdir -p ~/.config/godot/
+      - name: Setup directories
+        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/
           
       - name: Install dependencies
-        run: |
-          apt-get update && apt-get install -y rsync wget unzip
+        run: apt-get update && apt-get install -y rsync wget unzip
 
       - name: Cache Godot export templates
         id: cache-templates
         uses: actions/cache@v3
         with:
           path: ~/.local/share/godot/export_templates
-          # Update the cache key to match Godot 4.3
           key: ${{ runner.os }}-godot-templates-4.3
 
       - name: Download and install export templates
         if: steps.cache-templates.outputs.cache-hit != 'true'
         run: |
-          # Update URL to download Godot 4.3 templates
           wget https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -O templates.tpz
           unzip -q templates.tpz
-          # Update the directory name to match Godot 4.3
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm -rf templates templates.tpz
@@ -54,36 +46,7 @@ jobs:
       - name: Web Build
         run: |
           mkdir -p build/web
-          godot --headless --export-release "Web" ./build/web/index.html || exit 1
-          ls -la build/web
-          # Make sure the directory isn't empty
-          if [ -z "$(ls -A build/web)" ]; then
-            echo "Build directory is empty, export failed!"
-            exit 1
-          fi
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: build/web
-          retention-days: 1
-          if-no-files-found: error
-
-  deploy_to_itchio:
-    name: Deploy to itch.io
-    runs-on: ubuntu-latest
-    needs: export_game
-    if: success()
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: web-build
-          path: build/web
-
-      - name: Display structure of downloaded files
-        run: ls -R build/web
+          godot --headless --export-release "Web" ./build/web/index.html
 
       - name: Deploy to itch.io
         uses: josephbmanley/butler-publish-itchio-action@master
