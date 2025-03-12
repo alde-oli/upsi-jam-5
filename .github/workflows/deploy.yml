@@ -148,35 +148,11 @@ jobs:
           mkdir -p build/web
           godot --headless --export-release "Web" ./build/web/index.html
 
-      - name: Windows Build
-        run: |
-          mkdir -p build/windows
-          godot --headless --export-release "Windows Desktop" ./build/windows/${GITHUB_REPOSITORY##*/}.exe
-
-      - name: Linux Build
-        run: |
-          mkdir -p build/linux
-          godot --headless --export-release "Linux/X11" ./build/linux/${GITHUB_REPOSITORY##*/}
-
       - name: Upload Web build
         uses: actions/upload-artifact@v4
         with:
           name: web-build
           path: build/web
-          retention-days: 7
-
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-build
-          path: build/windows
-          retention-days: 7
-
-      - name: Upload Linux build
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-build
-          path: build/linux
           retention-days: 7
 
       - name: Create GitHub release for tags
@@ -282,18 +258,6 @@ jobs:
           name: web-build
           path: build/web
 
-      - name: Download Windows build
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-build
-          path: build/windows
-
-      - name: Download Linux build
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-build
-          path: build/linux
-
       - name: Deploy Web to itch.io
         uses: josephbmanley/butler-publish-itchio-action@master
         env:
@@ -302,28 +266,6 @@ jobs:
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/web
-          VERSION: ${{ github.sha }}
-          BUILD_METADATA: github-${{ github.run_id }}
-
-      - name: Deploy Windows to itch.io
-        uses: josephbmanley/butler-publish-itchio-action@master
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
-          CHANNEL: windows
-          ITCH_GAME: ${{ secrets.ITCH_GAME }}
-          ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: build/windows
-          VERSION: ${{ github.sha }}
-          BUILD_METADATA: github-${{ github.run_id }}
-
-      - name: Deploy Linux to itch.io
-        uses: josephbmanley/butler-publish-itchio-action@master
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
-          CHANNEL: linux
-          ITCH_GAME: ${{ secrets.ITCH_GAME }}
-          ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: build/linux
           VERSION: ${{ github.sha }}
           BUILD_METADATA: github-${{ github.run_id }}
 
