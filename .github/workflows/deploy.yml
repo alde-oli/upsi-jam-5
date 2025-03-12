@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # Update the container to use Godot 4.3
-      image: barichello/godot-ci:4.3.0
+      image: barichello/godot-ci:4.3
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,17 +38,17 @@ jobs:
         with:
           path: ~/.local/share/godot/export_templates
           # Update the cache key to match Godot 4.3
-          key: ${{ runner.os }}-godot-templates-4.3.0
+          key: ${{ runner.os }}-godot-templates-4.3
 
       - name: Download and install export templates
         if: steps.cache-templates.outputs.cache-hit != 'true'
         run: |
           # Update URL to download Godot 4.3 templates
-          wget https://github.com/godotengine/godot/releases/download/4.3.0-stable/Godot_v4.3.0-stable_export_templates.tpz -O templates.tpz
+          wget https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -O templates.tpz
           unzip -q templates.tpz
           # Update the directory name to match Godot 4.3
-          mkdir -p ~/.local/share/godot/export_templates/4.3.0.stable
-          mv templates/* ~/.local/share/godot/export_templates/4.3.0.stable/
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm -rf templates templates.tpz
 
       - name: Web Build
