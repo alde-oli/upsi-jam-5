@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://br3tsgho1flle"]
+[gd_scene load_steps=3 format=3 uid="uid://br3tsgho1flle"]
 
 [ext_resource type="Script" path="res://Scripts/empty_scene.gd" id="1_11vic"]
+[ext_resource type="Texture2D" uid="uid://bnoc8irl60021" path="res://upsi-jam-5.icon.png" id="2_e1otc"]
 
 [node name="EmptyScene" type="Node2D"]
 script = ExtResource("1_11vic")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(90, 89)
+texture = ExtResource("2_e1otc")
