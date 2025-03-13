@@ -1,4 +1,4 @@
-name: Create Release Tag
+name: Create Release Tag (Alternative)
 
 on:
   workflow_dispatch:
@@ -7,6 +7,9 @@ on:
         description: 'Version number (format: X.Y) without "v" prefix'
         required: true
         type: string
+
+permissions:
+  contents: write
 
 jobs:
   validate-version:
@@ -23,37 +26,36 @@ jobs:
           echo "Version format is valid: $VERSION"
           echo "tag_name=v$VERSION" >> $GITHUB_OUTPUT
       
-      - name: Check if tag exists
+      - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       
       - name: Verify tag doesn't exist
         run: |
           TAG_NAME="v${{ github.event.inputs.version }}"
-          if git tag | grep -q "^$TAG_NAME$"; then
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG_NAME$"; then
             echo "::error::Tag $TAG_NAME already exists"
             exit 1
           fi
           echo "Tag $TAG_NAME doesn't exist yet, we can proceed"
   
-  create-tag:
+  create-release:
     needs: validate-version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          fetch-depth: 0
-      
-      - name: Create and push tag
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          TAG_NAME="v${{ github.event.inputs.version }}"
-          git tag -a "$TAG_NAME" -m "Version ${{ github.event.inputs.version }}"
-          git push origin "$TAG_NAME"
-          echo "Successfully created and pushed tag: $TAG_NAME"
-      
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release v${{ github.event.inputs.version }}
+          draft: true
+          prerelease: false
+          
       - name: Call Discord Notifier
         uses: ./.github/workflows/discord-notifier.yml@main
         with:
