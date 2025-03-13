@@ -134,15 +134,12 @@ jobs:
             echo "period_msg=Dernières $HOURS heures" >> $GITHUB_OUTPUT
           fi
       
-      - name: Send activity summary
-        uses: ./.github/workflows/discord-notifier.yml
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
         with:
-          type: 'build'
-          status: 'success'
-          run_id: ${{ github.run_id }}
-          additional_info: |
-            # 📊 Résumé d'activité - ${{ steps.format.outputs.period_msg }}
-            
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: 📊 Résumé d'activité - ${{ steps.format.outputs.period_msg }}
+          description: |
             ## 📅 Période: ${{ steps.period.outputs.start_date }} à ${{ steps.period.outputs.end_date }}
             
             ### 📈 Statistiques générales
@@ -166,5 +163,5 @@ jobs:
             ${{ steps.stats.outputs.merged_pr_details }}
             
             ### 🔍 [Voir l'activité détaillée sur GitHub](https://github.com/${{ github.repository }}/pulse)
-        secrets:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          color: 0x0099ff
+          url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
