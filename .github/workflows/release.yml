@@ -1,12 +1,15 @@
 name: "Release Pipeline"
 
 on:
+  workflow_run:
+    workflows: ["Build Game"]
+    branches: [main]
+    types:
+      - completed
   push:
     tags:
       - 'v[0-9]+.[0-9]+'
       - 'v[0-9]+.[0-9]+.[0-9]+'
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       deploy_to_itchio:
@@ -16,63 +19,12 @@ on:
         type: boolean
 
 jobs:
-  check_build_status:
-    name: Check Build Status
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check latest build workflow run
-        id: build_check
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branch = 'main';
-            console.log(`Checking build status for branch: ${branch}`);
-            
-            const workflows = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'build.yml',
-              branch: branch,
-              status: 'completed',
-              per_page: 1
-            });
-            
-            if (workflows.data.workflow_runs.length === 0) {
-              core.setFailed('No build workflow runs found for the main branch');
-              return;
-            }
-            
-            const latestRun = workflows.data.workflow_runs[0];
-            console.log(`Latest build run conclusion: ${latestRun.conclusion}`);
-            
-            if (latestRun.conclusion !== 'success') {
-              core.setFailed(`Latest build did not succeed. Status: ${latestRun.conclusion}`);
-              return;
-            }
-            
-            console.log('Build check passed!');
-            
-      - name: Check branch
-        id: branch_check
-        run: |
-          CURRENT_BRANCH="${GITHUB_REF#refs/*/}"
-          TAG_PATTERN="^v[0-9]+\.[0-9]+(\.[0-9]+)?$"
-          
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            # C'est un tag - vérifions s'il est sur la branche main
-            echo "It's a tag: $CURRENT_BRANCH"
-            exit 0
-          elif [[ $CURRENT_BRANCH != "main" ]]; then
-            echo "::error::Release workflow can only run on the main branch, current branch is $CURRENT_BRANCH"
-            exit 1
-          fi
-          
-          echo "Branch check passed!"
-
   export_for_release:
     name: Export for Release
-    needs: [check_build_status]
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
@@ -174,7 +126,9 @@ jobs:
   deploy_to_itchio:
     name: Deploy to itch.io
     needs: export_for_release
-    if: (github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/')) || github.event.inputs.deploy_to_itchio == 'true'
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
+      github.event.inputs.deploy_to_itchio == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

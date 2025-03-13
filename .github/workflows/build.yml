@@ -1,55 +1,17 @@
 name: "Build Game"
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Quality checks"]
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'LICENSE'
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
-  check_quality_status:
-    name: Check Quality Status
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check latest quality workflow run
-        id: quality_check
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branch = context.payload.ref ? context.payload.ref.replace('refs/heads/', '') : context.payload.workflow_run ? context.payload.workflow_run.head_branch : '';
-            console.log(`Checking quality for branch: ${branch}`);
-            
-            const workflows = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'quality.yml',
-              branch: branch,
-              status: 'completed',
-              per_page: 1
-            });
-            
-            if (workflows.data.workflow_runs.length === 0) {
-              core.setFailed('No quality workflow runs found for this branch');
-              return;
-            }
-            
-            const latestRun = workflows.data.workflow_runs[0];
-            console.log(`Latest quality run conclusion: ${latestRun.conclusion}`);
-            
-            if (latestRun.conclusion !== 'success') {
-              core.setFailed(`Latest quality check did not succeed. Status: ${latestRun.conclusion}`);
-              return;
-            }
-            
-            console.log('Quality check passed!');
-
   export_game:
     name: Export Game
-    needs: [check_quality_status]
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
