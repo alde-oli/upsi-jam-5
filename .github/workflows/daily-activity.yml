@@ -32,22 +32,28 @@ jobs:
           END_DATE=$(date +"%Y-%m-%d %H:%M:%S")
           
           # Date de début (X heures en arrière depuis maintenant)
-          # Utilisons une autre méthode pour calculer la date de début pour éviter l'inversion
           START_DATE=$(date -d "$HOURS_AGO hours ago" +"%Y-%m-%d %H:%M:%S")
           
           # Conversion en format ISO pour l'API GitHub
           END_DATE_ISO=$(date -d "$END_DATE" -u +"%Y-%m-%dT%H:%M:%SZ")
           START_DATE_ISO=$(date -d "$START_DATE" -u +"%Y-%m-%dT%H:%M:%SZ")
           
+          # Conversion en timestamps Unix pour Discord
+          START_TIMESTAMP=$(date -d "$START_DATE" +%s)
+          END_TIMESTAMP=$(date -d "$END_DATE" +%s)
+          
           echo "hours_ago=$HOURS_AGO" >> $GITHUB_OUTPUT
           echo "start_date=$START_DATE" >> $GITHUB_OUTPUT
           echo "end_date=$END_DATE" >> $GITHUB_OUTPUT
           echo "start_date_iso=$START_DATE_ISO" >> $GITHUB_OUTPUT
           echo "end_date_iso=$END_DATE_ISO" >> $GITHUB_OUTPUT
+          echo "start_timestamp=$START_TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "end_timestamp=$END_TIMESTAMP" >> $GITHUB_OUTPUT
           
           # Debug output
           echo "Period: $START_DATE to $END_DATE"
           echo "ISO Period: $START_DATE_ISO to $END_DATE_ISO"
+          echo "Unix Timestamps: $START_TIMESTAMP to $END_TIMESTAMP"
       
       - name: Get activity stats
         id: stats
@@ -97,7 +103,6 @@ jobs:
           # Debug output
           echo "API request for PRs between $START_DATE_ISO and $END_DATE_ISO"
           
-          # Correction des filtres de date pour l'API GitHub
           MERGED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.merged_at != null and .merged_at >= \"${START_DATE_ISO}\" and .merged_at <= \"${END_DATE_ISO}\")] | length")
           OPENED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.created_at >= \"${START_DATE_ISO}\" and .created_at <= \"${END_DATE_ISO}\")] | length")
           CLOSED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.closed_at != null and .merged_at == null and .closed_at >= \"${START_DATE_ISO}\" and .closed_at <= \"${END_DATE_ISO}\")] | length")
@@ -157,7 +162,7 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           title: 📊 Résumé d'activité - ${{ steps.format.outputs.period_msg }}
           description: |
-            ## 📅 Période: ${{ steps.period.outputs.start_date }} à ${{ steps.period.outputs.end_date }}
+            ## 📅 Période: <t:${{ steps.period.outputs.start_timestamp }}:f> à <t:${{ steps.period.outputs.end_timestamp }}:f>
             
             ### 📈 Statistiques générales
             - 🔄 **Commits**: ${{ steps.stats.outputs.commit_count }}
