@@ -45,13 +45,20 @@ on:
         required: false
         type: string
         default: ''
-    secrets:
-      DISCORD_WEBHOOK:
+      discord_webhook:
+        description: 'Discord webhook URL'
         required: true
-      ITCH_USER:
+        type: string
+      itch_user:
+        description: 'Itch.io username'
         required: false
-      ITCH_GAME:
+        type: string
+        default: ''
+      itch_game:
+        description: 'Itch.io game name'
         required: false
+        type: string
+        default: ''
 
 jobs:
   notify:
@@ -98,8 +105,8 @@ jobs:
           if [[ "${{ inputs.status }}" == "success" ]]; then
             echo "title=🚀 Deployment Successful" >> $GITHUB_OUTPUT
             echo "color=0x44FF44" >> $GITHUB_OUTPUT
-            echo "description=Successfully deployed to itch.io!\n\nGame: ${{ secrets.ITCH_GAME }}\nUser: ${{ secrets.ITCH_USER }}\nCommit: ${{ inputs.commit }}\nBranch: ${{ inputs.branch }}\n\n[Play Online](https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }})" >> $GITHUB_OUTPUT
-            echo "url=https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }}" >> $GITHUB_OUTPUT
+            echo "description=Successfully deployed to itch.io!\n\nGame: ${{ inputs.itch_game }}\nUser: ${{ inputs.itch_user }}\nCommit: ${{ inputs.commit }}\nBranch: ${{ inputs.branch }}\n\n[Play Online](https://${{ inputs.itch_user }}.itch.io/${{ inputs.itch_game }})" >> $GITHUB_OUTPUT
+            echo "url=https://${{ inputs.itch_user }}.itch.io/${{ inputs.itch_game }}" >> $GITHUB_OUTPUT
           else
             echo "title=❌ Deployment Failed" >> $GITHUB_OUTPUT
             echo "color=0xFF0000" >> $GITHUB_OUTPUT
@@ -146,7 +153,7 @@ jobs:
       - name: Send Discord Notification
         uses: sarisia/actions-status-discord@v1
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook: ${{ inputs.discord_webhook }}
           title: ${{ steps.build_notification.outputs.title || steps.test_notification.outputs.title || steps.deploy_notification.outputs.title || steps.pr_notification.outputs.title || steps.release_notification.outputs.title }}
           description: ${{ steps.build_notification.outputs.description || steps.test_notification.outputs.description || steps.deploy_notification.outputs.description || steps.pr_notification.outputs.description || steps.release_notification.outputs.description }}${{ inputs.additional_info != '' && format('\n\n{0}', inputs.additional_info) || '' }}
           color: ${{ steps.build_notification.outputs.color || steps.test_notification.outputs.color || steps.deploy_notification.outputs.color || steps.pr_notification.outputs.color || steps.release_notification.outputs.color }}

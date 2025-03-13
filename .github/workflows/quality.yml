@@ -1,0 +1,98 @@
+name: "Quality checks"
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run tests'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - 'true'
+          - 'false'
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Run GDScript linting
+        run: |
+          mkdir -p reports
+          godot --headless --script addons/gdlint/gdlint.gd > reports/lint-report.txt || true
+          cat reports/lint-report.txt
+
+      - name: Upload lint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: reports/lint-report.txt
+          retention-days: 7
+      
+      - name: Call Discord Notifier
+        if: failure()
+        uses: ./.github/workflows/discord-notifier.yml@main
+        with:
+          type: 'build'
+          status: 'failure'
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          actor: ${{ github.actor }}
+          run_id: ${{ github.run_id }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == '' && vars.RUN_TESTS == 'true') }}
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Setup directories
+        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/ reports
+
+      - name: Run GUT tests
+        run: |
+          godot --headless --script addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit || true
+          cp .gut_editor_config.json reports/test-results.json || true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: reports/
+          retention-days: 7
+      
+      - name: Call Discord Notifier
+        uses: ./.github/workflows/discord-notifier.yml@main
+        with:
+          type: 'test'
+          status: ${{ job.status }}
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          actor: ${{ github.actor }}
+          run_id: ${{ github.run_id }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}

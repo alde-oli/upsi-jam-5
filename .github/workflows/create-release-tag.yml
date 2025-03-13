@@ -1,15 +1,44 @@
-name: Create Tag
+name: Create Release Tag
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number (without V)'
+        description: 'Version number (format: X.Y) without "v" prefix'
         required: true
         type: string
 
 jobs:
+  validate-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate version format
+        id: validate
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format. Must be in format X.Y (e.g., 1.0, 2.3)"
+            exit 1
+          fi
+          echo "Version format is valid: $VERSION"
+          echo "tag_name=v$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Check if tag exists
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Verify tag doesn't exist
+        run: |
+          TAG_NAME="v${{ github.event.inputs.version }}"
+          if git tag | grep -q "^$TAG_NAME$"; then
+            echo "::error::Tag $TAG_NAME already exists"
+            exit 1
+          fi
+          echo "Tag $TAG_NAME doesn't exist yet, we can proceed"
+  
   create-tag:
+    needs: validate-version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,5 +49,19 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag -a "V${{ github.event.inputs.version }}" -m "Version ${{ github.event.inputs.version }}"
-          git push origin "V${{ github.event.inputs.version }}"
+          TAG_NAME="v${{ github.event.inputs.version }}"
+          git tag -a "$TAG_NAME" -m "Version ${{ github.event.inputs.version }}"
+          git push origin "$TAG_NAME"
+          echo "Successfully created and pushed tag: $TAG_NAME"
+      
+      - name: Call Discord Notifier
+        uses: ./.github/workflows/discord-notifier.yml@main
+        with:
+          type: 'release'
+          status: 'success'
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          actor: ${{ github.actor }}
+          run_id: ${{ github.run_id }}
+          additional_info: "v${{ github.event.inputs.version }}"
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}

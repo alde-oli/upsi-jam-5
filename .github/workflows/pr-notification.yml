@@ -1,0 +1,36 @@
+name: "PR Notifications"
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+jobs:
+  notify_pr:
+    name: Notify PR Events
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Determine PR Status
+        id: pr_status
+        run: |
+          if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            echo "status=merged" >> $GITHUB_OUTPUT
+          else
+            echo "status=opened" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Call Discord Notifier
+        uses: ./.github/workflows/discord-notifier.yml@main
+        with:
+          type: 'pr'
+          status: ${{ steps.pr_status.outputs.status }}
+          branch: ${{ github.event.pull_request.head.ref }}
+          actor: ${{ github.event.pull_request.user.login }}
+          pr_number: ${{ github.event.pull_request.number }}
+          pr_title: ${{ github.event.pull_request.title }}
+          run_id: ${{ github.run_id }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
