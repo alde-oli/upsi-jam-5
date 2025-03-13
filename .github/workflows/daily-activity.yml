@@ -28,9 +28,10 @@ jobs:
           # Période en heures (24h par défaut ou valeur personnalisée)
           HOURS_AGO="${{ github.event.inputs.custom_period || '24' }}"
           
-          # Date actuelle
+          # Date actuelle (fin de la période)
           END_DATE=$(date +"%Y-%m-%d %H:%M:%S")
-          # Date de début (X heures en arrière)
+          
+          # Date de début (X heures en arrière depuis maintenant)
           START_DATE=$(date -d "$END_DATE - $HOURS_AGO hours" +"%Y-%m-%d %H:%M:%S")
           
           # Conversion en format ISO pour l'API GitHub
@@ -42,6 +43,10 @@ jobs:
           echo "end_date=$END_DATE" >> $GITHUB_OUTPUT
           echo "start_date_iso=$START_DATE_ISO" >> $GITHUB_OUTPUT
           echo "end_date_iso=$END_DATE_ISO" >> $GITHUB_OUTPUT
+          
+          # Debug output
+          echo "Period: $START_DATE to $END_DATE"
+          echo "ISO Period: $START_DATE_ISO to $END_DATE_ISO"
       
       - name: Get activity stats
         id: stats
@@ -52,9 +57,16 @@ jobs:
           START_DATE_ISO="${{ steps.period.outputs.start_date_iso }}"
           END_DATE_ISO="${{ steps.period.outputs.end_date_iso }}"
           
+          # Debug output
+          echo "Using date range: $START_DATE to $END_DATE"
+          
           # Nombre de commits
           COMMIT_COUNT=$(git log --since="$START_DATE" --until="$END_DATE" --pretty=format:"%h" | wc -l)
           echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          
+          # Debug output pour les commits
+          echo "Found $COMMIT_COUNT commits between $START_DATE and $END_DATE"
+          git log --since="$START_DATE" --until="$END_DATE" --pretty=format:"%h - %an - %ad - %s" || echo "No commits found"
           
           # Récupérer les auteurs des commits
           if [ "$COMMIT_COUNT" -gt 0 ]; then
@@ -80,6 +92,9 @@ jobs:
           # Nombre de PRs
           PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/pulls?state=all&sort=updated&direction=desc&per_page=100")
+          
+          # Debug output
+          echo "API request for PRs between $START_DATE_ISO and $END_DATE_ISO"
           
           MERGED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.merged_at != null and .merged_at >= \"${START_DATE_ISO}\" and .merged_at <= \"${END_DATE_ISO}\")] | length")
           OPENED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.created_at >= \"${START_DATE_ISO}\" and .created_at <= \"${END_DATE_ISO}\")] | length")
