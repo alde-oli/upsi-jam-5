@@ -1,0 +1,170 @@
+name: "Daily Activity Summary"
+
+on:
+  schedule:
+    # Exécution tous les jours à minuit (00:00)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      custom_period:
+        description: 'Période personnalisée en heures (par défaut: 24)'
+        required: false
+        default: '24'
+        type: string
+
+jobs:
+  activity_summary:
+    name: Generate Activity Summary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Calculate time period
+        id: period
+        run: |
+          # Période en heures (24h par défaut ou valeur personnalisée)
+          HOURS_AGO="${{ github.event.inputs.custom_period || '24' }}"
+          
+          # Date actuelle
+          END_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+          # Date de début (X heures en arrière)
+          START_DATE=$(date -d "$END_DATE - $HOURS_AGO hours" +"%Y-%m-%d %H:%M:%S")
+          
+          # Conversion en format ISO pour l'API GitHub
+          END_DATE_ISO=$(date -d "$END_DATE" -u +"%Y-%m-%dT%H:%M:%SZ")
+          START_DATE_ISO=$(date -d "$START_DATE" -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          echo "hours_ago=$HOURS_AGO" >> $GITHUB_OUTPUT
+          echo "start_date=$START_DATE" >> $GITHUB_OUTPUT
+          echo "end_date=$END_DATE" >> $GITHUB_OUTPUT
+          echo "start_date_iso=$START_DATE_ISO" >> $GITHUB_OUTPUT
+          echo "end_date_iso=$END_DATE_ISO" >> $GITHUB_OUTPUT
+      
+      - name: Get activity stats
+        id: stats
+        run: |
+          # Définir les dates pour le filtre git
+          START_DATE="${{ steps.period.outputs.start_date }}"
+          END_DATE="${{ steps.period.outputs.end_date }}"
+          START_DATE_ISO="${{ steps.period.outputs.start_date_iso }}"
+          END_DATE_ISO="${{ steps.period.outputs.end_date_iso }}"
+          
+          # Nombre de commits
+          COMMIT_COUNT=$(git log --since="$START_DATE" --until="$END_DATE" --pretty=format:"%h" | wc -l)
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          
+          # Récupérer les auteurs des commits
+          if [ "$COMMIT_COUNT" -gt 0 ]; then
+            COMMIT_AUTHORS=$(git log --since="$START_DATE" --until="$END_DATE" --pretty=format:"%an" | sort | uniq -c | sort -nr | awk '{print $2 " (" $1 ")"}' | head -5 | paste -sd "," -)
+            echo "commit_authors=$COMMIT_AUTHORS" >> $GITHUB_OUTPUT
+          else
+            echo "commit_authors=Aucun" >> $GITHUB_OUTPUT
+          fi
+          
+          # Récupérer les fichiers modifiés
+          if [ "$COMMIT_COUNT" -gt 0 ]; then
+            MODIFIED_FILES=$(git log --since="$START_DATE" --until="$END_DATE" --name-only --pretty=format:"" | sort | uniq | wc -l)
+            echo "modified_files=$MODIFIED_FILES" >> $GITHUB_OUTPUT
+            
+            # Top 5 des fichiers les plus modifiés
+            TOP_FILES=$(git log --since="$START_DATE" --until="$END_DATE" --name-only --pretty=format:"" | sort | uniq -c | sort -nr | head -5 | awk '{print $2}' | paste -sd "," -)
+            echo "top_files=$TOP_FILES" >> $GITHUB_OUTPUT
+          else
+            echo "modified_files=0" >> $GITHUB_OUTPUT
+            echo "top_files=Aucun" >> $GITHUB_OUTPUT
+          fi
+          
+          # Nombre de PRs
+          PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=all&sort=updated&direction=desc&per_page=100")
+          
+          MERGED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.merged_at != null and .merged_at >= \"${START_DATE_ISO}\" and .merged_at <= \"${END_DATE_ISO}\")] | length")
+          OPENED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.created_at >= \"${START_DATE_ISO}\" and .created_at <= \"${END_DATE_ISO}\")] | length")
+          CLOSED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.closed_at != null and .merged_at == null and .closed_at >= \"${START_DATE_ISO}\" and .closed_at <= \"${END_DATE_ISO}\")] | length")
+          
+          echo "merged_prs=$MERGED_PRS" >> $GITHUB_OUTPUT
+          echo "opened_prs=$OPENED_PRS" >> $GITHUB_OUTPUT
+          echo "closed_prs=$CLOSED_PRS" >> $GITHUB_OUTPUT
+          
+          # Récupérer les PRs ouvertes (détails)
+          if [ "$OPENED_PRS" -gt 0 ]; then
+            OPEN_PR_DETAILS=$(echo "$PR_DATA" | jq -r "[.[] | select(.created_at >= \"${START_DATE_ISO}\" and .created_at <= \"${END_DATE_ISO}\")] | map(\"#\" + (.number|tostring) + \": \" + .title + \" par \" + .user.login) | join(\"\n- \")")
+            echo "open_pr_details<<EOF" >> $GITHUB_OUTPUT
+            echo "- $OPEN_PR_DETAILS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "open_pr_details=Aucune nouvelle PR" >> $GITHUB_OUTPUT
+          fi
+          
+          # Récupérer les PRs fusionnées (détails)
+          if [ "$MERGED_PRS" -gt 0 ]; then
+            MERGED_PR_DETAILS=$(echo "$PR_DATA" | jq -r "[.[] | select(.merged_at != null and .merged_at >= \"${START_DATE_ISO}\" and .merged_at <= \"${END_DATE_ISO}\")] | map(\"#\" + (.number|tostring) + \": \" + .title + \" par \" + .user.login) | join(\"\n- \")")
+            echo "merged_pr_details<<EOF" >> $GITHUB_OUTPUT
+            echo "- $MERGED_PR_DETAILS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "merged_pr_details=Aucune PR fusionnée" >> $GITHUB_OUTPUT
+          fi
+          
+          # Nombre de contributeurs
+          CONTRIBUTORS=$(git log --since="$START_DATE" --until="$END_DATE" --format="%an" | sort | uniq | wc -l)
+          echo "contributors=$CONTRIBUTORS" >> $GITHUB_OUTPUT
+          
+          # Dernière action de workflow
+          LAST_ACTION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=completed&per_page=1" | \
+            jq -r '.workflow_runs[0] | .name + " (" + .conclusion + ") le " + .created_at')
+          
+          echo "last_action=$LAST_ACTION" >> $GITHUB_OUTPUT
+          
+          # Informations sur les branches
+          BRANCHES_UPDATED=$(git for-each-ref --sort=-committerdate refs/remotes/ --format='%(refname:short)' | grep -v "HEAD" | head -5 | sed 's#origin/##' | paste -sd "," -)
+          echo "branches_updated=$BRANCHES_UPDATED" >> $GITHUB_OUTPUT
+      
+      - name: Format period message
+        id: format
+        run: |
+          HOURS="${{ steps.period.outputs.hours_ago }}"
+          if [ "$HOURS" -eq "24" ]; then
+            echo "period_msg=Dernières 24 heures" >> $GITHUB_OUTPUT
+          else
+            echo "period_msg=Dernières $HOURS heures" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Send activity summary
+        uses: ./.github/workflows/discord-notifier.yml
+        with:
+          type: 'build'
+          status: 'success'
+          run_id: ${{ github.run_id }}
+          additional_info: |
+            # 📊 Résumé d'activité - ${{ steps.format.outputs.period_msg }}
+            
+            ## 📅 Période: ${{ steps.period.outputs.start_date }} à ${{ steps.period.outputs.end_date }}
+            
+            ### 📈 Statistiques générales
+            - 🔄 **Commits**: ${{ steps.stats.outputs.commit_count }}
+            - 📝 **Fichiers modifiés**: ${{ steps.stats.outputs.modified_files }}
+            - 🔀 **PRs ouvertes**: ${{ steps.stats.outputs.opened_prs }}
+            - ✅ **PRs fusionnées**: ${{ steps.stats.outputs.merged_prs }}
+            - ❌ **PRs fermées sans fusion**: ${{ steps.stats.outputs.closed_prs }}
+            - 👥 **Contributeurs actifs**: ${{ steps.stats.outputs.contributors }}
+            
+            ### 👨‍💻 Top contributeurs
+            ${{ steps.stats.outputs.commit_authors }}
+            
+            ### 🔄 Branches récemment mises à jour
+            ${{ steps.stats.outputs.branches_updated }}
+            
+            ### 📋 Nouvelles Pull Requests
+            ${{ steps.stats.outputs.open_pr_details }}
+            
+            ### ✅ Pull Requests fusionnées
+            ${{ steps.stats.outputs.merged_pr_details }}
+            
+            ### 🔍 [Voir l'activité détaillée sur GitHub](https://github.com/${{ github.repository }}/pulse)
+        secrets:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
