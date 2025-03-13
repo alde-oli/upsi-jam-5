@@ -1,0 +1,24 @@
+name: Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (without V)'
+        required: true
+        type: string
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Create and push tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "V${{ github.event.inputs.version }}" -m "Version ${{ github.event.inputs.version }}"
+          git push origin "V${{ github.event.inputs.version }}"
