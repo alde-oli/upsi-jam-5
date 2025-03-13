@@ -32,7 +32,8 @@ jobs:
           END_DATE=$(date +"%Y-%m-%d %H:%M:%S")
           
           # Date de début (X heures en arrière depuis maintenant)
-          START_DATE=$(date -d "$END_DATE - $HOURS_AGO hours" +"%Y-%m-%d %H:%M:%S")
+          # Utilisons une autre méthode pour calculer la date de début pour éviter l'inversion
+          START_DATE=$(date -d "$HOURS_AGO hours ago" +"%Y-%m-%d %H:%M:%S")
           
           # Conversion en format ISO pour l'API GitHub
           END_DATE_ISO=$(date -d "$END_DATE" -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -96,6 +97,7 @@ jobs:
           # Debug output
           echo "API request for PRs between $START_DATE_ISO and $END_DATE_ISO"
           
+          # Correction des filtres de date pour l'API GitHub
           MERGED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.merged_at != null and .merged_at >= \"${START_DATE_ISO}\" and .merged_at <= \"${END_DATE_ISO}\")] | length")
           OPENED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.created_at >= \"${START_DATE_ISO}\" and .created_at <= \"${END_DATE_ISO}\")] | length")
           CLOSED_PRS=$(echo "$PR_DATA" | jq -r "[.[] | select(.closed_at != null and .merged_at == null and .closed_at >= \"${START_DATE_ISO}\" and .closed_at <= \"${END_DATE_ISO}\")] | length")
