@@ -13,12 +13,15 @@ on:
       run_tests:
         description: 'Run tests'
         required: false
-        default: ''
+        default: 'auto'
         type: choice
         options:
-          - ''
+          - 'auto'
           - 'true'
           - 'false'
+
+env:
+  RUN_TESTS: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == 'auto' && vars.RUN_TESTS == 'true') }}
 
 jobs:
   lint:
@@ -34,9 +37,10 @@ jobs:
           fetch-depth: 0
 
       - name: Run GDScript linting
+        id: gdlint
         run: |
           mkdir -p reports
-          godot --headless --script addons/gdlint/gdlint.gd > reports/lint-report.txt || true
+          godot --headless --script addons/gdlint/gdlint.gd > reports/lint-report.txt || echo "::set-output name=lint_failed::true"
           cat reports/lint-report.txt
 
       - name: Upload lint report
@@ -47,8 +51,8 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        if: failure()
-        uses: ./.github/workflows/discord-notifier.yml@main
+        if: failure() || steps.gdlint.outputs.lint_failed == 'true'
+        uses: ./.github/workflows/discord-notifier.yml
         with:
           type: 'build'
           status: 'failure'
@@ -57,11 +61,62 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          additional_info: "Lint issues detected. See report for details."
+
+  format:
+    name: Format Code
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Run GDScript formatter
+        id: gdformat
+        run: |
+          mkdir -p reports
+          
+          # Check format only (don't modify files)
+          CHECK_RESULT=0
+          godot --headless --script addons/gdformat/gdformat.gd --check > reports/format-report.txt || CHECK_RESULT=$?
+          
+          if [ $CHECK_RESULT -ne 0 ]; then
+            echo "::set-output name=format_failed::true"
+            echo "Format check failed! See report for details."
+            cat reports/format-report.txt
+          else
+            echo "All files are properly formatted."
+          fi
+
+      - name: Upload format report
+        uses: actions/upload-artifact@v4
+        with:
+          name: format-report
+          path: reports/format-report.txt
+          retention-days: 7
+      
+      - name: Call Discord Notifier
+        if: failure() || steps.gdformat.outputs.format_failed == 'true'
+        uses: ./.github/workflows/discord-notifier.yml
+        with:
+          type: 'build'
+          status: 'failure'
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          actor: ${{ github.actor }}
+          run_id: ${{ github.run_id }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          additional_info: "Format issues detected. See report for details."
 
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == '' && vars.RUN_TESTS == 'true') }}
+    needs: [lint, format]
+    if: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == 'auto' && vars.RUN_TESTS == 'true') }}
     container:
       image: barichello/godot-ci:4.3
     steps:
@@ -75,9 +130,23 @@ jobs:
         run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/ reports
 
       - name: Run GUT tests
+        id: gut_tests
         run: |
-          godot --headless --script addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit || true
+          # Run tests and capture exit code
+          godot --headless --script addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit -gjunit_xml_file=reports/junit-results.xml || TEST_EXIT=$?
           cp .gut_editor_config.json reports/test-results.json || true
+          
+          # Parse test results for notification
+          if [ -f reports/test-results.json ]; then
+            TOTAL=$(jq '.test_scripts | length' reports/test-results.json)
+            PASSED=$(jq '.scripts_passing' reports/test-results.json)
+            FAILED=$(jq '.scripts_failing' reports/test-results.json)
+            echo "::set-output name=test_stats::${TOTAL}/${PASSED}/${FAILED}"
+            
+            if [ $FAILED -gt 0 ]; then
+              echo "::set-output name=tests_failed::true"
+            fi
+          fi
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -87,12 +156,13 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        uses: ./.github/workflows/discord-notifier.yml@main
+        uses: ./.github/workflows/discord-notifier.yml
         with:
           type: 'test'
-          status: ${{ job.status }}
+          status: ${{ steps.gut_tests.outputs.tests_failed == 'true' && 'failure' || 'success' }}
           branch: ${{ github.ref_name }}
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
+          test_stats: ${{ steps.gut_tests.outputs.test_stats }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
