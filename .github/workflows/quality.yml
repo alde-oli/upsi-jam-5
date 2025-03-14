@@ -97,7 +97,7 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        if: failure() || steps.gdformat.outputs.format_failed == 'true' ||  'true' == 'true'
+        if: failure() || steps.gdformat.outputs.format_failed == 'true'
         uses: ./.github/actions/discord-notifier
         with:
           type: 'build'

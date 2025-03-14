@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup directories
-        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/
+        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/ build/web
           
       - name: Install dependencies
         run: apt-get update && apt-get install -y rsync wget unzip
@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.local/share/godot/export_templates
-          key: ${{ runner.os }}-godot-templates-4.3
+          key: ${{ runner.os }}-godot-templates-4.3-stable
 
       - name: Download and install export templates
         if: steps.cache-templates.outputs.cache-hit != 'true'
@@ -45,9 +45,24 @@ jobs:
           rm -rf templates templates.tpz
 
       - name: Web Build
+        id: web_build
         run: |
-          mkdir -p build/web
-          godot --headless --export-release "Web" ./build/web/index.html
+          echo "Building web export..."
+          godot --headless --export-release "Web" ./build/web/index.html || {
+            echo "::set-output name=build_failed::true"
+            exit 1
+          }
+          echo "Web build completed successfully"
+
+      - name: Desktop Build (Optional)
+        if: false  # Désactivé par défaut, activez si nécessaire
+        run: |
+          mkdir -p build/linux
+          godot --headless --export-release "Linux/X11" ./build/linux/game.x86_64
+          chmod +x ./build/linux/game.x86_64
+          
+          mkdir -p build/windows
+          godot --headless --export-release "Windows Desktop" ./build/windows/game.exe
 
       - name: Upload Web build
         uses: actions/upload-artifact@v4
@@ -57,7 +72,7 @@ jobs:
           retention-days: 7
 
       - name: Call Discord Notifier
-        uses: ./.github/workflows/discord-notifier.yml@main
+        uses: ./.github/actions/discord-notifier
         with:
           type: 'build'
           status: ${{ job.status }}
@@ -66,11 +81,14 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          additional_info: "Web build completed and available as an artifact."
 
-  deploy_preview:
-    name: Deploy Preview
+
+
+  deploy_production:
+    name: Deploy to Production
     needs: export_game
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -84,38 +102,24 @@ jobs:
           name: web-build
           path: build/web
 
-      - name: Deploy to GitHub Pages for PR review
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
-          destination_dir: pr-preview/${{ github.event.pull_request.number }}
-          keep_files: true
-
-      - name: Comment on PR with preview link
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issue_number = context.issue.number;
-            const repo = context.repo.repo;
-            const owner = context.repo.owner;
-            const preview_url = `https://${owner}.github.io/${repo}/pr-preview/${issue_number}/`;
-            github.rest.issues.createComment({
-              issue_number: issue_number,
-              owner: owner,
-              repo: repo,
-              body: `✨ PR preview ready! ✨\n\nYou can test this PR at: [${preview_url}](${preview_url})`
-            });
+          destination_dir: ./
+          force_orphan: true
 
       - name: Call Discord Notifier
-        uses: ./.github/workflows/discord-notifier.yml@main
+        uses: ./.github/actions/discord-notifier
         with:
-          type: 'pr'
-          status: ${{ job.status }}
-          branch: ${{ github.head_ref }}
-          actor: ${{ github.event.pull_request.user.login }}
-          pr_number: ${{ github.event.pull_request.number }}
-          pr_title: ${{ github.event.pull_request.title }}
+          type: 'deploy'
+          status: 'success'
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          itch_user: ${{ vars.ITCH_USER || github.repository_owner }}
+          itch_game: ${{ vars.ITCH_GAME || github.event.repository.name }}
+          additional_info: "Deployed to GitHub Pages!"

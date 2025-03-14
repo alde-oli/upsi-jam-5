@@ -1,30 +1,65 @@
 name: "Release Pipeline"
 
 on:
-  workflow_run:
-    workflows: ["Build Game"]
-    branches: [main]
-    types:
-      - completed
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Version tag (ex: v1.0.0)'
+        required: true
+        type: string
       deploy_to_itchio:
         description: 'Deploy to itch.io'
         required: false
-        default: false
+        default: true
         type: boolean
+      release_notes:
+        description: 'Release notes'
+        required: false
+        default: ''
+        type: string
 
 jobs:
+  check_build_status:
+    name: Check Build Status
+    runs-on: ubuntu-latest
+    outputs:
+      last_build_status: ${{ steps.check_build.outputs.build_status }}
+    steps:
+      - name: Check last build status
+        id: check_build
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const workflowName = "Build Game";
+            const branch = "main";
+            
+            const { data: workflows } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowName,
+              branch: branch,
+              status: 'completed',
+              per_page: 1
+            });
+            
+            if (workflows.workflow_runs.length === 0) {
+              core.setFailed('No completed builds found for the main branch');
+              return;
+            }
+            
+            const lastRun = workflows.workflow_runs[0];
+            core.info(`Last build conclusion: ${lastRun.conclusion}`);
+            core.setOutput('build_status', lastRun.conclusion);
+            
+            if (lastRun.conclusion !== 'success') {
+              core.setFailed(`Last build was not successful: ${lastRun.conclusion}`);
+            }
+
   export_for_release:
     name: Export for Release
-    if: |
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
-      github.event_name == 'workflow_dispatch'
+    needs: check_build_status
+    if: needs.check_build_status.outputs.last_build_status == 'success'
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
@@ -34,6 +69,7 @@ jobs:
         with:
           lfs: true
           fetch-depth: 0
+          ref: main
 
       - name: Setup directories
         run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/
@@ -46,7 +82,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.local/share/godot/export_templates
-          key: ${{ runner.os }}-godot-templates-4.3
+          key: ${{ runner.os }}-godot-templates-4.3-stable
 
       - name: Download and install export templates
         if: steps.cache-templates.outputs.cache-hit != 'true'
@@ -71,64 +107,55 @@ jobs:
         run: |
           mkdir -p build/linux
           godot --headless --export-release "Linux/X11" ./build/linux/${GITHUB_REPOSITORY#*/}.x86_64
+          chmod +x ./build/linux/${GITHUB_REPOSITORY#*/}.x86_64
 
-      - name: Upload Web build
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: build/web
-          retention-days: 7
+      - name: Create release ZIP files
+        run: |
+          cd build/web && zip -r ../../web-build.zip .
+          cd ../../build/windows && zip -r ../../windows-build.zip .
+          cd ../../build/linux && zip -r ../../linux-build.zip .
 
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-build
-          path: build/windows
-          retention-days: 7
+      - name: Create Git Tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          git push origin ${{ github.event.inputs.version }}
 
-      - name: Upload Linux build
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-build
-          path: build/linux
-          retention-days: 7
-
-      - name: Extract tag name
-        id: tag
-        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        if: startsWith(github.ref, 'refs/tags/')
-
-      - name: Create GitHub release
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          body: |
+            ${{ github.event.inputs.release_notes }}
+            
+            This release was created automatically by GitHub Actions.
           files: |
-            build/web/**
-            build/windows/**
-            build/linux/**
-          draft: true
-          name: Release ${{ steps.tag.outputs.TAG_NAME }}
+            web-build.zip
+            windows-build.zip
+            linux-build.zip
+          draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: startsWith(github.ref, 'refs/tags/')
 
       - name: Call Discord Notifier
-        uses: ./.github/workflows/discord-notifier.yml@main
+        uses: ./.github/actions/discord-notifier
         with:
           type: 'release'
           status: ${{ job.status }}
-          branch: ${{ github.ref_name }}
+          branch: 'main'
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          additional_info: ${{ steps.tag.outputs.TAG_NAME }}
+          additional_info: ${{ github.event.inputs.version }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy_to_itchio:
     name: Deploy to itch.io
     needs: export_for_release
-    if: |
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
-      github.event.inputs.deploy_to_itchio == 'true'
+    if: github.event.inputs.deploy_to_itchio == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -136,28 +163,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Download Web build
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: web-build
-          path: build/web
+          path: build
 
-      - name: Download Windows build
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-build
-          path: build/windows
-
-      - name: Download Linux build
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-build
-          path: build/linux
-
-      - name: Extract tag name
-        id: tag
-        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Extract builds
+        run: |
+          mkdir -p build/web build/windows build/linux
+          unzip -o web-build.zip -d build/web/
+          unzip -o windows-build.zip -d build/windows/
+          unzip -o linux-build.zip -d build/linux/
 
       - name: Deploy Web to itch.io
         uses: josephbmanley/butler-publish-itchio-action@master
@@ -167,7 +183,7 @@ jobs:
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/web
-          VERSION: ${{ steps.tag.outputs.TAG_NAME || github.sha }}
+          VERSION: ${{ github.event.inputs.version }}
           BUILD_METADATA: github-${{ github.run_id }}
 
       - name: Deploy Windows to itch.io
@@ -178,7 +194,7 @@ jobs:
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/windows
-          VERSION: ${{ steps.tag.outputs.TAG_NAME || github.sha }}
+          VERSION: ${{ github.event.inputs.version }}
           BUILD_METADATA: github-${{ github.run_id }}
 
       - name: Deploy Linux to itch.io
@@ -189,15 +205,15 @@ jobs:
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/linux
-          VERSION: ${{ steps.tag.outputs.TAG_NAME || github.sha }}
+          VERSION: ${{ github.event.inputs.version }}
           BUILD_METADATA: github-${{ github.run_id }}
 
       - name: Call Discord Notifier
-        uses: ./.github/workflows/discord-notifier.yml@main
+        uses: ./.github/actions/discord-notifier
         with:
           type: 'deploy'
           status: ${{ job.status }}
-          branch: ${{ github.ref_name }}
+          branch: 'main'
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
