@@ -48,7 +48,7 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        if: failure() || steps.gdlint.outputs.lint_failed == 'true'
+        if: failure() || steps.gdlint.outputs.lint_failed == 'true' ||  'true' == 'true'
         uses: ./.github/actions/discord-notifier
         with:
           type: 'build'
@@ -97,7 +97,7 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        if: failure() || steps.gdformat.outputs.format_failed == 'true'
+        if: failure() || steps.gdformat.outputs.format_failed == 'true' ||  'true' == 'true'
         uses: ./.github/actions/discord-notifier
         with:
           type: 'build'
