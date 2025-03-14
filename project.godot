@@ -11,10 +11,16 @@ config_version=5
 [application]
 
 config/name="upsi-jam-5"
-config/features=PackedStringArray("4.3", "Forward Plus")
+run/main_scene="res://Levels/level_1.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
 [editor]
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+config_version=5
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

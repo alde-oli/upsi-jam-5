@@ -1,0 +1,79 @@
+[gd_scene load_steps=10 format=3 uid="uid://bd1hsmn67cy68"]
+
+[ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
+[ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
+[ext_resource type="Texture2D" uid="uid://by7snkrp27nv7" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hj28q"]
+size = Vector2(1353, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yl0qo"]
+size = Vector2(20, 251)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6fg64"]
+size = Vector2(20, 345.5)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_xomba"]
+a = Vector2(676, -455)
+b = Vector2(677, 43)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_iodtc"]
+a = Vector2(677, -456)
+b = Vector2(-674, -457)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_oo4iy"]
+a = Vector2(-673, -457)
+b = Vector2(-675, 41)
+
+[node name="level_1" type="Node2D"]
+
+[node name="Player" parent="." instance=ExtResource("1_yyxgn")]
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+zoom = Vector2(1.5, 1.5)
+
+[node name="temp_ground" type="StaticBody2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="temp_ground"]
+position = Vector2(0.500019, 33)
+scale = Vector2(28.3191, 1.25)
+texture = ExtResource("2_ptecu")
+region_enabled = true
+region_rect = Rect2(32.1041, 79.8625, 47.7443, 16.0238)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_ground"]
+position = Vector2(0.5, 33)
+shape = SubResource("RectangleShape2D_hj28q")
+
+[node name="temp_wall" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall"]
+position = Vector2(221, -102.5)
+shape = SubResource("RectangleShape2D_yl0qo")
+
+[node name="Sprite2D" type="Sprite2D" parent="temp_wall"]
+position = Vector2(221, -102.5)
+scale = Vector2(0.0625, 1.39444)
+texture = ExtResource("3_fq4ei")
+
+[node name="temp_wall_2" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall_2"]
+position = Vector2(391, -150.25)
+shape = SubResource("RectangleShape2D_6fg64")
+
+[node name="Sprite2D" type="Sprite2D" parent="temp_wall_2"]
+position = Vector2(391.5, -150)
+scale = Vector2(0.065625, 1.92222)
+texture = ExtResource("3_fq4ei")
+
+[node name="level_borders" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="level_borders"]
+shape = SubResource("SegmentShape2D_xomba")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="level_borders"]
+shape = SubResource("SegmentShape2D_iodtc")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="level_borders"]
+shape = SubResource("SegmentShape2D_oo4iy")
