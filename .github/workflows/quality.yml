@@ -20,9 +20,6 @@ on:
           - 'true'
           - 'false'
 
-env:
-  RUN_TESTS: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == 'auto' && vars.RUN_TESTS == 'true') }}
-
 jobs:
   lint:
     name: Lint Code
@@ -116,7 +113,7 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     needs: [lint, format]
-    if: ${{ env.RUN_TESTS == 'true' }}
+    if: ${{ github.event.inputs.run_tests == 'true' || (github.event.inputs.run_tests == 'auto' && vars.RUN_TESTS == 'true') }}
     container:
       image: barichello/godot-ci:4.3
     steps:
