@@ -1,16 +1,20 @@
-name: "Release Pipeline"
+name: "Build and Deploy Game"
 
 on:
+  # Auto-déclenchement à chaque push sur main
+  push:
+    branches: [main]
+  # Déclenchement manuel pour les releases
   workflow_dispatch:
     inputs:
       version:
         description: 'Version tag (ex: v1.0.0)'
-        required: true
-        type: string
-      deploy_to_itchio:
-        description: 'Deploy to itch.io'
         required: false
-        default: true
+        type: string
+      create_release:
+        description: 'Create GitHub Release'
+        required: false
+        default: false
         type: boolean
       release_notes:
         description: 'Release notes'
@@ -18,58 +22,14 @@ on:
         default: ''
         type: string
 
-# Ajouter les permissions nécessaires
+# Permissions nécessaires
 permissions:
   contents: write  # Pour créer des tags et des releases
 
 jobs:
-  check_build_status:
-    name: Check Build Status
-    runs-on: ubuntu-latest
-    outputs:
-      last_build_status: ${{ steps.check_build.outputs.build_status }}
-    steps:
-      - name: Check last build status
-        id: check_build
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            // Référencer directement le workflow par son chemin
-            const workflowPath = '.github/workflows/build.yml';
-            const branch = 'main';
-            
-            try {
-              const { data: workflowRuns } = await github.rest.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: workflowPath,
-                branch: branch,
-                status: 'completed',
-                per_page: 1
-              });
-              
-              if (workflowRuns.total_count === 0) {
-                core.setFailed('No completed builds found for the main branch');
-                return;
-              }
-              
-              const lastRun = workflowRuns.workflow_runs[0];
-              core.info(`Last build conclusion: ${lastRun.conclusion}, Run ID: ${lastRun.id}`);
-              core.setOutput('build_status', lastRun.conclusion);
-              
-              if (lastRun.conclusion !== 'success') {
-                core.setFailed(`Last build was not successful: ${lastRun.conclusion}`);
-              }
-            } catch (error) {
-              core.error(`Error checking build status: ${error.message}`);
-              core.setFailed('Failed to check build status. Ensure the build workflow exists at the expected path.');
-            }
-
-  export_for_release:
-    name: Export for Release
-    needs: check_build_status
-    if: needs.check_build_status.outputs.last_build_status == 'success'
+  export_game:
+    name: Export Game
+    # S'exécute pour tous les déclencheurs (push et manuel)
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
@@ -79,7 +39,6 @@ jobs:
         with:
           lfs: true
           fetch-depth: 0
-          ref: main
 
       - name: Configure Git
         run: |
@@ -110,11 +69,15 @@ jobs:
           rm -rf templates templates.tpz
 
       - name: Web Build
+        id: web_build
         run: |
           mkdir -p build/web
-          godot --headless --export-release "Web" ./build/web/index.html
+          godot --headless --export-release "Web" ./build/web/index.html || {
+            echo "::set-output name=build_failed::true"
+            exit 1
+          }
 
-      - name: Create release ZIP files
+      - name: Create release ZIP file
         run: |
           cd build/web && zip -r ../../web-build.zip .
 
@@ -122,15 +85,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: web-build.zip
+          path: build/web
           retention-days: 7
 
+      # Étapes pour créer une release (seulement si lancé manuellement avec create_release=true)
       - name: Create Git Tag
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true' && github.event.inputs.version != '' }}
         run: |
           git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
           git push https://${{ github.token }}@github.com/${{ github.repository }}.git ${{ github.event.inputs.version }}
 
       - name: Create GitHub Release
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true' && github.event.inputs.version != '' }}
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
@@ -145,22 +111,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Call Discord Notifier
+      # Notification Discord pour build réussi ou release
+      - name: Call Discord Notifier for Build/Release
         uses: ./.github/actions/discord-notifier
         with:
-          type: 'release'
+          type: ${{ github.event.inputs.create_release == 'true' && 'release' || 'build' }}
           status: ${{ job.status }}
-          branch: 'main'
+          branch: ${{ github.ref_name }}
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          additional_info: ${{ github.event.inputs.version }}
-          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
+          discord_webhook: ${{ secrets.DISCORD_BUILD_TEST }}
+          additional_info: ${{ github.event.inputs.version || 'Auto-build completed' }}
 
+  # Job de déploiement sur itch.io (toujours exécuté après un build réussi)
   deploy_to_itchio:
     name: Deploy to itch.io
-    needs: export_for_release
-    if: github.event.inputs.deploy_to_itchio == 'true'
+    needs: export_game
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -172,12 +139,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: web-build
-          path: ./
-
-      - name: Extract builds
-        run: |
-          mkdir -p build/web
-          unzip -o web-build.zip -d build/web/
+          path: ./build/web
 
       - name: Deploy Web to itch.io
         uses: josephbmanley/butler-publish-itchio-action@master
@@ -187,15 +149,15 @@ jobs:
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/web
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ github.event.inputs.version || github.sha }}
           BUILD_METADATA: github-${{ github.run_id }}
 
-      - name: Call Discord Notifier
+      - name: Call Discord Notifier for Deploy
         uses: ./.github/actions/discord-notifier
         with:
           type: 'deploy'
           status: ${{ job.status }}
-          branch: 'main'
+          branch: ${{ github.ref_name }}
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
