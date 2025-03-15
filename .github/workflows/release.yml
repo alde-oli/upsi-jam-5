@@ -18,6 +18,10 @@ on:
         default: ''
         type: string
 
+# Ajouter les permissions nécessaires
+permissions:
+  contents: write  # Pour créer des tags et des releases
+
 jobs:
   check_build_status:
     name: Check Build Status
@@ -117,7 +121,7 @@ jobs:
       - name: Create Git Tag
         run: |
           git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
-          git push origin ${{ github.event.inputs.version }}
+          git push https://${{ github.token }}@github.com/${{ github.repository }}.git ${{ github.event.inputs.version }}
 
       - name: Create GitHub Release
         id: create_release
@@ -144,7 +148,7 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           additional_info: ${{ github.event.inputs.version }}
-          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy_to_itchio:
     name: Deploy to itch.io
@@ -187,6 +191,6 @@ jobs:
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
           itch_user: ${{ secrets.ITCH_USER }}
           itch_game: ${{ secrets.ITCH_GAME }}
