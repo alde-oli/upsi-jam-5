@@ -1,14 +1,14 @@
-[gd_scene load_steps=16 format=3 uid="uid://bd1hsmn67cy68"]
+[gd_scene load_steps=19 format=3 uid="uid://bd1hsmn67cy68"]
 
-[ext_resource type="Script" uid="uid://b763p2m8bvmm1" path="res://Scripts/level_1.gd" id="1_syshm"]
+[ext_resource type="Script" path="res://Scripts/level_1.gd" id="1_syshm"]
 [ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
-[ext_resource type="PackedScene" uid="uid://cc8bkqlws8bno" path="res://Scenes/Ennemis/Pike.tscn" id="2_rfktq"]
-[ext_resource type="PackedScene" uid="uid://c68ripskkce86" path="res://Scenes/PauseMenu.tscn" id="5_rfktq"]
 [ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
+[ext_resource type="PackedScene" uid="uid://cc8bkqlws8bno" path="res://Scenes/Ennemis/Pike.tscn" id="2_rfktq"]
 [ext_resource type="Texture2D" uid="uid://by7snkrp27nv7" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
 [ext_resource type="Script" uid="uid://cdxrs3ycypkwk" path="res://Levels/parallax_background.gd" id="4_f4pg2"]
 [ext_resource type="Texture2D" uid="uid://co05r82oxnvhx" path="res://Sprites/Environment/ParallaxBackground/0Background.png" id="4_xoyoh"]
 [ext_resource type="Texture2D" uid="uid://bg5prddtx25ov" path="res://Sprites/Environment/ParallaxBackground/1Mountains Front.png" id="5_f4pg2"]
+[ext_resource type="PackedScene" uid="uid://c68ripskkce86" path="res://Scenes/PauseMenu.tscn" id="5_rfktq"]
 [ext_resource type="Texture2D" uid="uid://c06s4o2swcyil" path="res://Sprites/Environment/ParallaxBackground/2Clouds mid.png" id="6_62b6n"]
 [ext_resource type="Texture2D" uid="uid://daxytr08cs5yr" path="res://Sprites/Environment/ParallaxBackground/3MountainMid.png" id="7_rs4xw"]
 [ext_resource type="Texture2D" uid="uid://dq4inbpaf46i1" path="res://Sprites/Environment/ParallaxBackground/4MountainsBack.png" id="8_lk57d"]
@@ -126,6 +126,7 @@ shape = SubResource("SegmentShape2D_oo4iy")
 
 [node name="PauseMenu" parent="CanvasLayer" instance=ExtResource("5_rfktq")]
 visible = false
+
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 script = ExtResource("4_f4pg2")
 base_motion_scale = 0.2
