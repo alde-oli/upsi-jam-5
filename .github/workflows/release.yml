@@ -31,48 +31,35 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // D'abord, listons tous les workflows
-            const { data: workflowsList } = await github.rest.actions.listWorkflowsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
+            // Référencer directement le workflow par son chemin
+            const workflowPath = '.github/workflows/build.yml';
+            const branch = 'main';
             
-            // Cherchons l'ID du workflow build.yml
-            let buildWorkflowId = null;
-            for (const workflow of workflowsList.workflows) {
-              if (workflow.name === "Build Game" || workflow.path.includes("build.yml")) {
-                buildWorkflowId = workflow.id;
-                core.info(`Found build workflow: ${workflow.name}, ID: ${buildWorkflowId}, Path: ${workflow.path}`);
-                break;
+            try {
+              const { data: workflowRuns } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflowPath,
+                branch: branch,
+                status: 'completed',
+                per_page: 1
+              });
+              
+              if (workflowRuns.total_count === 0) {
+                core.setFailed('No completed builds found for the main branch');
+                return;
               }
-            }
-            
-            if (!buildWorkflowId) {
-              core.setFailed('Build workflow not found. Please check workflow names.');
-              return;
-            }
-            
-            // Maintenant, vérifions le dernier run avec l'ID du workflow
-            const { data: workflowRuns } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: buildWorkflowId,
-              branch: 'main',
-              status: 'completed',
-              per_page: 1
-            });
-            
-            if (workflowRuns.total_count === 0) {
-              core.setFailed('No completed builds found for the main branch');
-              return;
-            }
-            
-            const lastRun = workflowRuns.workflow_runs[0];
-            core.info(`Last build conclusion: ${lastRun.conclusion}, Run ID: ${lastRun.id}`);
-            core.setOutput('build_status', lastRun.conclusion);
-            
-            if (lastRun.conclusion !== 'success') {
-              core.setFailed(`Last build was not successful: ${lastRun.conclusion}`);
+              
+              const lastRun = workflowRuns.workflow_runs[0];
+              core.info(`Last build conclusion: ${lastRun.conclusion}, Run ID: ${lastRun.id}`);
+              core.setOutput('build_status', lastRun.conclusion);
+              
+              if (lastRun.conclusion !== 'success') {
+                core.setFailed(`Last build was not successful: ${lastRun.conclusion}`);
+              }
+            } catch (error) {
+              core.error(`Error checking build status: ${error.message}`);
+              core.setFailed('Failed to check build status. Ensure the build workflow exists at the expected path.');
             }
 
   export_for_release:
@@ -168,7 +155,7 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           additional_info: ${{ github.event.inputs.version }}
-          DISCORD_DEPLOY: ${{ secrets.DISCORD_DEPLOY }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy_to_itchio:
     name: Deploy to itch.io
@@ -235,6 +222,6 @@ jobs:
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          DISCORD_DEPLOY: ${{ secrets.DISCORD_DEPLOY }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
           itch_user: ${{ secrets.ITCH_USER }}
           itch_game: ${{ secrets.ITCH_GAME }}
