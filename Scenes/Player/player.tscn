@@ -314,12 +314,12 @@ script = ExtResource("1_vajw0")
 max_speed = 600.0
 jump_force = 400
 max_jump_count = 2
-can_wall_jump = true
 can_dash = true
 dash_force = 1000.0
 dash_duration = 0.1
 clone_scene = ExtResource("2_74mp2")
 chain_scene = ExtResource("3_oikmp")
+clone_launch_force = 1000.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 8)

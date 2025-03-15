@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dwuankk1cnid3" path="res://Sprites/Player/White/White player jump 48x48.png" id="2_ygbde"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ygbde"]
+radius = 9.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g0voy"]
 atlas = ExtResource("2_ygbde")
@@ -103,7 +104,7 @@ script = ExtResource("1_6axpw")
 shape = SubResource("CapsuleShape2D_ygbde")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(-0.5, -7.5)
-scale = Vector2(1.10417, 1.3125)
+position = Vector2(5.66244e-07, -2)
+scale = Vector2(0.916667, 1.08333)
 sprite_frames = SubResource("SpriteFrames_g0voy")
-animation = &"fall"
+animation = &"idle"
