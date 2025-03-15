@@ -12,6 +12,7 @@ class_name Player
 @export var deceleration: float = 150.0
 
 @export var gravity: int = 980
+var stop_gravity: bool = false
 @export var jump_force: int = 50
 @export var max_jump_count: int = 1
 

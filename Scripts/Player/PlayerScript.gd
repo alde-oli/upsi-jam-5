@@ -60,6 +60,7 @@ func move():
 		target = mouse_locked_pos
 		toMove = soul
 	elif (move_state == MOVESTATES.BODYTOSOUL):
+		body.stop_gravity = true
 		target = soul_pos
 		toMove = body
 	elif (move_state == MOVESTATES.SOULTOBODY):
@@ -91,12 +92,13 @@ func _process(delta: float) -> void:
 	checkLinked(delta)
 
 func bond():
-	print_debug("Body and soul bond")
+	print("Body and soul bond")
 	is_linked = true
 	is_mouse_locked = false
 	merge_timer = 0
 	move_state = MOVESTATES.NEUTRAL
 	soul.hide()
+	body.stop_gravity = false
 	#animation and whatnot
 
 func unbond():

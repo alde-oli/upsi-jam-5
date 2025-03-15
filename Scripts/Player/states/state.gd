@@ -29,7 +29,7 @@ func on_exit():
 
 # Méthodes d'aide communes à tous les états
 func apply_gravity(delta):
-	if not player.is_on_floor():
+	if not player.is_on_floor() && !player.stop_gravity:
 		player.velocity.y += player.gravity * delta
 
 
