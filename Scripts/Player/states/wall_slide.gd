@@ -3,11 +3,13 @@ class_name WallSlideState
 
 var wall_normal: Vector2
 var wall_slide_gravity_factor: float = 0.4  # Ralentissement de la chute sur le mur
+var wall_friction_timer: float = 0.0        # Timer pour suivre quand désactiver la friction
 
 
 func on_start():
 	# Récupérer la normale du mur pour déterminer la direction du wall jump
 	wall_normal = player.get_wall_normal()
+	player.velocity.y = 0
 	
 	# Réinitialiser le compteur de saut pour permettre un wall jump
 	player.jump_count = 0
@@ -19,7 +21,10 @@ func process(delta):
 		player.velocity.y += player.gravity * delta * wall_slide_gravity_factor
 	
 	# Limiter la vitesse de descente sur le mur
-	player.velocity.y = min(player.velocity.y, 200)
+	wall_friction_timer += delta
+	if not (wall_friction_timer > 1.0):
+		print(wall_friction_timer)
+		player.velocity.y = min(player.velocity.y, 200)
 	
 	# Vérifier les transitions vers d'autres états
 	
@@ -51,4 +56,5 @@ func process(delta):
 
 func on_exit():
 	# Pas de logique spécifique à la sortie de l'état wall slide
+	wall_friction_timer = 0.0
 	pass
