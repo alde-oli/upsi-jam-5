@@ -80,5 +80,5 @@ jobs:
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_BUILD_TEST }}
           additional_info: "Web build completed and available as an artifact."

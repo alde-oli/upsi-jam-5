@@ -150,7 +150,7 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           additional_info: ${{ github.event.inputs.version }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
 
   deploy_to_itchio:
     name: Deploy to itch.io
@@ -217,6 +217,6 @@ jobs:
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
           itch_user: ${{ secrets.ITCH_USER }}
           itch_game: ${{ secrets.ITCH_GAME }}

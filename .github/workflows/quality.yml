@@ -157,4 +157,4 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           test_stats: ${{ steps.gut_tests.outputs.test_stats }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_BUILD_TEST }}

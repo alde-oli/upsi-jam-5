@@ -33,4 +33,4 @@ jobs:
           pr_number: ${{ github.event.pull_request.number }}
           pr_title: ${{ github.event.pull_request.title }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_PR }}

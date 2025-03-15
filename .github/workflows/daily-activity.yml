@@ -159,7 +159,7 @@ jobs:
       - name: Send Discord Notification
         uses: sarisia/actions-status-discord@v1
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook: ${{ secrets.DISCORD_RECAP }}
           title: 📊 Résumé d'activité - ${{ steps.format.outputs.period_msg }}
           description: |
             ## 📅 Période: <t:${{ steps.period.outputs.start_timestamp }}:f> à <t:${{ steps.period.outputs.end_timestamp }}:f>
