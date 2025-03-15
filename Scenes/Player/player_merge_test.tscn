@@ -8,8 +8,10 @@
 script = ExtResource("1_kspyc")
 
 [node name="Body" parent="." instance=ExtResource("2_u6w3k")]
+max_jump_count = 1
 
 [node name="Soul" parent="." instance=ExtResource("3_u6w3k")]
+visible = false
 collision_layer = 0
 collision_mask = 0
 mass = 0.001

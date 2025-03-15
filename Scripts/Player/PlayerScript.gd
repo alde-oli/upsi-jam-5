@@ -3,6 +3,8 @@ extends Node2D
 enum MOVESTATES {NEUTRAL, BODYTOSOUL, SOULTOBODY, SEPERATE}
 var move_state: MOVESTATES = MOVESTATES.NEUTRAL
 
+@export var camera: Camera2D
+
 #region Body & soul
 @onready var body : CharacterBody2D = $Body
 @onready var soul : RigidBody2D = $Soul
@@ -20,10 +22,10 @@ var max_soul_distance: float = 300
 
 #region Merge
 @export var merge_speed : float = 2
-var merge_margin: float = 4
+var merge_margin: float = 30
 var merge_cooldown: float = 1
 var merge_timer: float = 0
-var merge_min_velocity: float = 2
+var merge_min_velocity: float = 3
 #endregion
 
 #region Mouse
@@ -52,8 +54,6 @@ func debug_pos():
 func move():
 	if (is_linked || move_state == MOVESTATES.NEUTRAL):
 		return
-	print_debug("State: " + str(move_state)
-	+ "\nLinked: " + str(is_linked))
 	var toMove: PhysicsBody2D
 	var target: Vector2
 	if (move_state == MOVESTATES.SEPERATE):
@@ -69,28 +69,26 @@ func move():
 	var velocity = (target - toMove.global_position) * 0.1 * merge_speed
 	if (velocity.length() <= merge_min_velocity):
 		velocity = velocity.normalized() * merge_min_velocity
-	toMove.global_position += velocity
+	if (toMove.global_position.distance_to(target) <= merge_margin):
+		toMove.global_position = target
+	else:
+		toMove.global_position += velocity
+	checkLinked(0)
 
 func _process(delta: float) -> void:
-	global_position = body_pos
+	camera.position = body_pos
 	if (!is_linked && move_state != MOVESTATES.NEUTRAL):
 		move()
 	if (Input.is_action_just_pressed("seperate") && is_linked):
-		is_linked = false
-		mouse_locked_pos = mouse_pos
-		is_mouse_locked = true
 		move_state = MOVESTATES.SEPERATE
-	if (Input.is_action_just_pressed("join") && !is_linked):
+		unbond()
+	elif (Input.is_action_just_pressed("join") && !is_linked):
 		move_state = MOVESTATES.BODYTOSOUL
 		is_linked = false
-	if (Input.is_action_just_pressed("recall") && !is_linked):
+	elif (Input.is_action_just_pressed("recall") && !is_linked):
 		move_state = MOVESTATES.SOULTOBODY
 		is_linked = false
 	checkLinked(delta)
-
-func detachSoul(target_pos: Vector2):
-	soul.detach(target_pos)
-	is_linked = false
 
 func bond():
 	print_debug("Body and soul bond")
@@ -98,7 +96,15 @@ func bond():
 	is_mouse_locked = false
 	merge_timer = 0
 	move_state = MOVESTATES.NEUTRAL
+	soul.hide()
 	#animation and whatnot
+
+func unbond():
+		soul_pos = body_pos
+		is_linked = false
+		mouse_locked_pos = mouse_pos
+		is_mouse_locked = true
+		soul.show()
 
 func checkLinked(delta: float):
 	if (is_linked):
