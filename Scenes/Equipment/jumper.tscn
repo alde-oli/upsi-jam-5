@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://hj8b212cua8x"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_srpuw"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("CircleShape2D_srpuw")
+debug_color = Color(0.860874, 0.192783, 0.752069, 0.42)
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="StaticBody2D/CollisionShape2D"]
+emission_shape = 1
+emission_sphere_radius = 10.14
+direction = Vector2(1, -1)
+gravity = Vector2(0, -80)

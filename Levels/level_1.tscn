@@ -1,10 +1,9 @@
-[gd_scene load_steps=19 format=3 uid="uid://bd1hsmn67cy68"]
+[gd_scene load_steps=17 format=4 uid="uid://bd1hsmn67cy68"]
 
 [ext_resource type="Script" path="res://Scripts/level_1.gd" id="1_syshm"]
 [ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
 [ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
 [ext_resource type="PackedScene" uid="uid://cc8bkqlws8bno" path="res://Scenes/Ennemis/Pike.tscn" id="2_rfktq"]
-[ext_resource type="Texture2D" uid="uid://by7snkrp27nv7" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
 [ext_resource type="Script" uid="uid://cdxrs3ycypkwk" path="res://Levels/parallax_background.gd" id="4_f4pg2"]
 [ext_resource type="Texture2D" uid="uid://co05r82oxnvhx" path="res://Sprites/Environment/ParallaxBackground/0Background.png" id="4_xoyoh"]
 [ext_resource type="Texture2D" uid="uid://bg5prddtx25ov" path="res://Sprites/Environment/ParallaxBackground/1Mountains Front.png" id="5_f4pg2"]
@@ -13,24 +12,22 @@
 [ext_resource type="Texture2D" uid="uid://daxytr08cs5yr" path="res://Sprites/Environment/ParallaxBackground/3MountainMid.png" id="7_rs4xw"]
 [ext_resource type="Texture2D" uid="uid://dq4inbpaf46i1" path="res://Sprites/Environment/ParallaxBackground/4MountainsBack.png" id="8_lk57d"]
 [ext_resource type="Texture2D" uid="uid://3bpf2txqk15s" path="res://Sprites/Environment/ParallaxBackground/5Clouds Back.png" id="9_2hkqn"]
+[ext_resource type="Texture2D" uid="uid://l2vrt3jdp5tf" path="res://Scenes/Equipment/tilemap.png" id="13_lk57d"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hj28q"]
-size = Vector2(1353, 20)
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_lk57d"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_6fg64"]
-size = Vector2(201, 12)
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2hkqn"]
+texture = ExtResource("13_lk57d")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 0.0983429, 8, 0.0983429, 8, 8, -8, 8)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 0.397667, 8, 0.397667, 8, 8, -8, 8)
+2:2/0 = 0
+2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 0.0787992, 8, 0.0472803, 8, 8, -8, 8)
 
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_xomba"]
-a = Vector2(676, -455)
-b = Vector2(677, 43)
-
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_iodtc"]
-a = Vector2(677, -456)
-b = Vector2(-674, -457)
-
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_oo4iy"]
-a = Vector2(-673, -457)
-b = Vector2(-675, 41)
+[sub_resource type="TileSet" id="TileSet_2hkqn"]
+physics_layer_0/collision_layer = 1
+sources/4 = SubResource("TileSetAtlasSource_2hkqn")
 
 [node name="level_1" type="Node2D"]
 script = ExtResource("1_syshm")
@@ -51,6 +48,7 @@ position = Vector2(198, 170)
 scale = Vector2(0.7, 0.7)
 max_speed = 300.0
 acceleration = 500.0
+jump_force = 250
 
 [node name="Label" type="Label" parent="Player"]
 offset_left = -141.0
@@ -69,58 +67,8 @@ region_enabled = true
 region_rect = Rect2(32.1041, 79.8625, 47.7443, 16.0238)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="temp_ground"]
-position = Vector2(618, 242)
-shape = SubResource("RectangleShape2D_hj28q")
-
-[node name="temp_wall" type="StaticBody2D" parent="."]
-position = Vector2(333, 220)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall"]
-position = Vector2(323.5, -36)
-shape = SubResource("RectangleShape2D_6fg64")
-
-[node name="Sprite2D" type="Sprite2D" parent="temp_wall"]
-position = Vector2(323.982, -35.8864)
-scale = Vector2(0.625111, 0.065404)
-texture = ExtResource("3_fq4ei")
-
-[node name="temp_wall" type="StaticBody2D" parent="temp_wall"]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall/temp_wall"]
-position = Vector2(420.5, -128)
-shape = SubResource("RectangleShape2D_6fg64")
-
-[node name="Sprite2D" type="Sprite2D" parent="temp_wall/temp_wall"]
-position = Vector2(420.143, -128.386)
-scale = Vector2(0.625892, 0.0598484)
-texture = ExtResource("3_fq4ei")
-
-[node name="temp_wall_2" type="StaticBody2D" parent="."]
-position = Vector2(-241, 0)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall_2"]
-position = Vector2(425, 137.773)
-shape = SubResource("RectangleShape2D_6fg64")
-
-[node name="Sprite2D" type="Sprite2D" parent="temp_wall_2"]
-position = Vector2(424.75, 137.386)
-scale = Vector2(0.623438, 0.0598484)
-texture = ExtResource("3_fq4ei")
-
-[node name="level_borders" type="StaticBody2D" parent="."]
-position = Vector2(-241, 0)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="level_borders"]
-position = Vector2(630, 204)
-shape = SubResource("SegmentShape2D_xomba")
-
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="level_borders"]
-position = Vector2(630, 204)
-shape = SubResource("SegmentShape2D_iodtc")
-
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="level_borders"]
-position = Vector2(630, 204)
-shape = SubResource("SegmentShape2D_oo4iy")
+position = Vector2(620, 231)
+shape = SubResource("WorldBoundaryShape2D_lk57d")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -189,3 +137,9 @@ motion_mirroring = Vector2(640, 0)
 texture_filter = 1
 texture = ExtResource("9_2hkqn")
 centered = false
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+z_index = 99
+position = Vector2(1, 0)
+tile_map_data = PackedByteArray("AAAOAA0ABAAAAAAAAAAPAA0ABAAAAAAAAAAQAA0ABAAAAAAAAAARAA0ABAAAAAAAAAASAA0ABAAAAAAAAAATAA0ABAAAAAAAAAANAA0ABAAAAAAAAAAMAA0ABAAAAAAAAAALAA0ABAAAAAAAAAAKAA0ABAAAAAAAAAAVAAwABAAAAAAAAAAWAAwABAABAAEAAAAXAAwABAACAAIAAAAYAAwABAAAAAAAAAAZAAwABAACAAIAAAAaAAwABAABAAEAAAATAAsABAAAAAAAAAAUAAsABAABAAEAAAASAAgABAACAAIAAAATAAgABAACAAIAAAAUAAgABAAAAAAAAAAPAAoABAAAAAAAAAAQAAoABAAAAAAAAAANAAcABAACAAIAAAAOAAcABAABAAEAAAAPAAcABAABAAEAAAAMAAQABAACAAIAAAANAAQABAACAAIAAAAOAAQABAABAAEAAAAPAAQABAACAAIAAAATAAQABAAAAAAAAAAUAAQABAACAAIAAAAVAAQABAABAAEAAAATAAYABAACAAIAAAAUAAYABAABAAEAAAAQAAIABAACAAIAAAARAAIABAABAAEAAAAWAAcABAABAAEAAAAXAAcABAACAAIAAAAYAAYABAABAAEAAAAZAAYABAACAAIAAAAaAAUABAABAAEAAAAbAAUABAACAAIAAAAcAAQABAABAAEAAAAdAAQABAABAAEAAAAeAAMABAACAAIAAAAfAAMABAACAAIAAAA=")
+tile_set = SubResource("TileSet_2hkqn")
