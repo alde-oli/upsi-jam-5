@@ -146,7 +146,7 @@ region = Rect2(288, 0, 48, 48)
 atlas = ExtResource("7_jhyir")
 region = Rect2(336, 0, 48, 48)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_mwii3"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_gk6dx"]
 atlas = ExtResource("8_74mp2")
 region = Rect2(0, 0, 48, 48)
 
@@ -273,7 +273,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_mwii3")
+"texture": SubResource("AtlasTexture_gk6dx")
 }],
 "loop": true,
 "name": &"wall_slide",
@@ -318,7 +318,7 @@ script = ExtResource("5_t7wdw")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 4)
 sprite_frames = SubResource("SpriteFrames_2jnj1")
-animation = &"dash"
+animation = &"wall_slide"
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
 visible = false
