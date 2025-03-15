@@ -118,6 +118,13 @@ jobs:
         run: |
           cd build/web && zip -r ../../web-build.zip .
 
+      - name: Upload Web build as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: web-build.zip
+          retention-days: 7
+
       - name: Create Git Tag
         run: |
           git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
@@ -148,7 +155,7 @@ jobs:
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
           additional_info: ${{ github.event.inputs.version }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
 
   deploy_to_itchio:
     name: Deploy to itch.io
@@ -161,10 +168,11 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Download build artifacts
+      - name: Download web-build artifact
         uses: actions/download-artifact@v4
         with:
-          path: build
+          name: web-build
+          path: ./
 
       - name: Extract builds
         run: |
@@ -191,6 +199,6 @@ jobs:
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          discord_webhook: ${{ secrets.DISCORD_DEPLOY }}
           itch_user: ${{ secrets.ITCH_USER }}
           itch_game: ${{ secrets.ITCH_GAME }}
