@@ -1,8 +1,8 @@
 [gd_scene load_steps=9 format=3 uid="uid://bd1hsmn67cy68"]
 
 [ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
-[ext_resource type="Texture2D" uid="uid://bl11gtm7bdkvb" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
-[ext_resource type="Texture2D" uid="uid://yeidkds6620l" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
+[ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
+[ext_resource type="Texture2D" uid="uid://by7snkrp27nv7" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hj28q"]
 size = Vector2(1353, 20)
@@ -34,7 +34,7 @@ zoom = Vector2(4, 4)
 [node name="Sprite2D" type="Sprite2D" parent="temp_ground"]
 position = Vector2(0.500019, 33)
 scale = Vector2(28.3191, 1.25)
-texture = ExtResource("2_3mhv4")
+texture = ExtResource("2_ptecu")
 region_enabled = true
 region_rect = Rect2(32.1041, 79.8625, 47.7443, 16.0238)
 
@@ -49,9 +49,9 @@ position = Vector2(323.5, -36)
 shape = SubResource("RectangleShape2D_6fg64")
 
 [node name="Sprite2D" type="Sprite2D" parent="temp_wall"]
-position = Vector2(323.5, -36)
-scale = Vector2(7.17857, 0.272727)
-texture = ExtResource("3_rf6l5")
+position = Vector2(323.982, -35.8864)
+scale = Vector2(0.625111, 0.065404)
+texture = ExtResource("3_fq4ei")
 
 [node name="temp_wall" type="StaticBody2D" parent="temp_wall"]
 
@@ -60,9 +60,9 @@ position = Vector2(420.5, -128)
 shape = SubResource("RectangleShape2D_6fg64")
 
 [node name="Sprite2D" type="Sprite2D" parent="temp_wall/temp_wall"]
-position = Vector2(420.5, -128)
-scale = Vector2(7.17857, 0.272727)
-texture = ExtResource("3_rf6l5")
+position = Vector2(420.143, -128.386)
+scale = Vector2(0.625892, 0.0598484)
+texture = ExtResource("3_fq4ei")
 
 [node name="temp_wall_2" type="StaticBody2D" parent="."]
 
@@ -71,9 +71,9 @@ position = Vector2(96.5, -100)
 shape = SubResource("RectangleShape2D_6fg64")
 
 [node name="Sprite2D" type="Sprite2D" parent="temp_wall_2"]
-position = Vector2(96.5, -100)
-scale = Vector2(7.17857, 0.272727)
-texture = ExtResource("3_rf6l5")
+position = Vector2(96.25, -100.386)
+scale = Vector2(0.623438, 0.0598484)
+texture = ExtResource("3_fq4ei")
 
 [node name="level_borders" type="StaticBody2D" parent="."]
 
