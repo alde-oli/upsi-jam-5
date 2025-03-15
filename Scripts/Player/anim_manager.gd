@@ -3,7 +3,7 @@ class_name AnimManager
 
 var player: Player
 var current_state_name: String = ""
-@onready var animation_player = $"../anim"  # Correspond au nom dans le script original
+@onready var animation_player = $"../AnimatedSprite2D"  # Correspond au nom dans le script original
 
 
 func init(p: Player):
@@ -18,7 +18,7 @@ func update_animation(state_name: String):
 		"idle":
 			play("idle")
 		"run":
-			play("walk")  # "walk" utilisé dans le script original
+			play("run")  # "walk" utilisé dans le script original
 		"jump":
 			play("jump")
 		"fall":

@@ -4,7 +4,7 @@ class_name Player
 @onready var state_machine = $StateMachine
 @onready var input_manager = $InputManager
 @onready var anim_manager = $AnimManager
-@onready var sprite = $Sprite2D
+@onready var animated_sprite = $AnimatedSprite2D
 
 # Variables exportées pour les réglages dans l'éditeur
 @export var max_speed: float = 1000.0
@@ -40,7 +40,7 @@ func _physics_process(delta):
 	# Mettre à jour l'orientation du sprite si nécessaire
 	if input_direction != 0:
 		facing_direction = input_direction
-		sprite.scale.x = facing_direction
+		animated_sprite.flip_h = (facing_direction < 0)
 	
 	# Processus de la state machine
 	state_machine.process(delta)
