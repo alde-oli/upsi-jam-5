@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://jaxsq83n6hww"]
+
+[ext_resource type="Script" uid="uid://24nnl4flv8kq" path="res://Scripts/Player/PlayerScript.gd" id="1_kspyc"]
+[ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="2_u6w3k"]
+[ext_resource type="PackedScene" uid="uid://2e33oqvgens2" path="res://Scenes/Player/soul.tscn" id="3_u6w3k"]
+
+[node name="PlayerMergeTest" type="Node2D"]
+script = ExtResource("1_kspyc")
+
+[node name="Body" parent="." instance=ExtResource("2_u6w3k")]
+
+[node name="Soul" parent="." instance=ExtResource("3_u6w3k")]
+collision_layer = 0
+collision_mask = 0
+mass = 0.001
+gravity_scale = 0.0
+lock_rotation = true

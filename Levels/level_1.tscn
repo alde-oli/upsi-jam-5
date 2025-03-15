@@ -1,8 +1,8 @@
 [gd_scene load_steps=9 format=3 uid="uid://bd1hsmn67cy68"]
 
-[ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
-[ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
-[ext_resource type="Texture2D" uid="uid://by7snkrp27nv7" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
+[ext_resource type="PackedScene" uid="uid://jaxsq83n6hww" path="res://Scenes/Player/player_merge_test.tscn" id="1_3mhv4"]
+[ext_resource type="Texture2D" uid="uid://by3fp33ue20do" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
+[ext_resource type="Texture2D" uid="uid://carb3hpe2bqea" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hj28q"]
 size = Vector2(1353, 20)
@@ -24,10 +24,10 @@ b = Vector2(-675, 41)
 
 [node name="level_1" type="Node2D"]
 
-[node name="Player" parent="." instance=ExtResource("1_yyxgn")]
+[node name="Player" parent="." instance=ExtResource("1_3mhv4")]
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
-zoom = Vector2(4, 4)
+zoom = Vector2(2.495, 2.495)
 
 [node name="temp_ground" type="StaticBody2D" parent="."]
 

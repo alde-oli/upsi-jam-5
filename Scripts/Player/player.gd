@@ -7,17 +7,17 @@ class_name Player
 @onready var animated_sprite = $AnimatedSprite2D
 
 # Variables exportées pour les réglages dans l'éditeur
-@export var max_speed: float = 1000.0
-@export var acceleration: float = 1000.0
-@export var deceleration: float = 1500.0
+@export var max_speed: float = 100.0
+@export var acceleration: float = 100.0
+@export var deceleration: float = 150.0
 
-@export var gravity: int = 980
-@export var jump_force: int = 500
+@export var gravity: int = 98
+@export var jump_force: int = 50
 @export var max_jump_count: int = 1
 
 @export var can_wall_jump: bool = false
 @export var can_dash: bool = false
-@export var dash_force: float = 2000.0
+@export var dash_force: float = 200.0
 @export var dash_duration: float = 0.2
 
 # Variables d'état pour le joueur

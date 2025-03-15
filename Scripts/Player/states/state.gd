@@ -39,6 +39,7 @@ func apply_movement(delta, direction: float):
 			player.velocity.x += direction * delta * (player.acceleration + player.deceleration)
 		else: # accélération
 			player.velocity.x += direction * delta * player.acceleration
-		player.velocity.x = clamp(player.velocity.x, -player.max_speed, player.max_speed)
 	else: # décélération normale
 		player.velocity.x = move_toward(player.velocity.x, 0, player.deceleration * delta)
+	player.velocity.x = clamp(player.velocity.x, -player.max_speed, player.max_speed)
+		
