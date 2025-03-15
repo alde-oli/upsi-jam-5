@@ -48,7 +48,10 @@ func take_damage():
 func _physics_process(delta):
 	# La logique est maintenant gérée par la state machine
 	input_direction = input_manager.get_movement_direction()
-	
+	var camera = get_parent().get_node("Camera2D")
+	if camera:
+		# Update only the X position to match the player
+		camera.global_position.x = global_position.x
 	# Mettre à jour l'orientation du sprite si nécessaire
 	if input_direction != 0:
 		facing_direction = input_direction

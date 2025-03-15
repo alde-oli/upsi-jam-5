@@ -1,11 +1,18 @@
-[gd_scene load_steps=12 format=3 uid="uid://bd1hsmn67cy68"]
+[gd_scene load_steps=16 format=3 uid="uid://bd1hsmn67cy68"]
 
 [ext_resource type="Script" uid="uid://b763p2m8bvmm1" path="res://Scripts/level_1.gd" id="1_syshm"]
 [ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
-[ext_resource type="Texture2D" uid="uid://6ylvsu4wfptb" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
 [ext_resource type="PackedScene" uid="uid://cc8bkqlws8bno" path="res://Scenes/Ennemis/Pike.tscn" id="2_rfktq"]
-[ext_resource type="Texture2D" uid="uid://rt5porcjhmo5" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
 [ext_resource type="PackedScene" uid="uid://c68ripskkce86" path="res://Scenes/PauseMenu.tscn" id="5_rfktq"]
+[ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
+[ext_resource type="Texture2D" uid="uid://by7snkrp27nv7" path="res://Sprites/Environment/background_sprite_1.png" id="3_fq4ei"]
+[ext_resource type="Script" uid="uid://cdxrs3ycypkwk" path="res://Levels/parallax_background.gd" id="4_f4pg2"]
+[ext_resource type="Texture2D" uid="uid://co05r82oxnvhx" path="res://Sprites/Environment/ParallaxBackground/0Background.png" id="4_xoyoh"]
+[ext_resource type="Texture2D" uid="uid://bg5prddtx25ov" path="res://Sprites/Environment/ParallaxBackground/1Mountains Front.png" id="5_f4pg2"]
+[ext_resource type="Texture2D" uid="uid://c06s4o2swcyil" path="res://Sprites/Environment/ParallaxBackground/2Clouds mid.png" id="6_62b6n"]
+[ext_resource type="Texture2D" uid="uid://daxytr08cs5yr" path="res://Sprites/Environment/ParallaxBackground/3MountainMid.png" id="7_rs4xw"]
+[ext_resource type="Texture2D" uid="uid://dq4inbpaf46i1" path="res://Sprites/Environment/ParallaxBackground/4MountainsBack.png" id="8_lk57d"]
+[ext_resource type="Texture2D" uid="uid://3bpf2txqk15s" path="res://Sprites/Environment/ParallaxBackground/5Clouds Back.png" id="9_2hkqn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hj28q"]
 size = Vector2(1353, 20)
@@ -34,10 +41,16 @@ position = Vector2(-118, 14)
 [node name="Pike2" parent="." instance=ExtResource("2_rfktq")]
 position = Vector2(110, 15)
 
-[node name="Player" parent="." instance=ExtResource("1_yyxgn")]
+[node name="Camera2D" type="Camera2D" parent="."]
+z_index = 99
+position = Vector2(198, 170)
+offset = Vector2(0, -50)
 
-[node name="Camera2D" type="Camera2D" parent="Player"]
-zoom = Vector2(4, 4)
+[node name="Player" parent="." instance=ExtResource("1_yyxgn")]
+position = Vector2(198, 170)
+scale = Vector2(0.7, 0.7)
+max_speed = 300.0
+acceleration = 500.0
 
 [node name="Label" type="Label" parent="Player"]
 offset_left = -141.0
@@ -46,19 +59,21 @@ offset_right = -101.0
 offset_bottom = -57.0
 
 [node name="temp_ground" type="StaticBody2D" parent="."]
+position = Vector2(-241, 0)
 
 [node name="Sprite2D" type="Sprite2D" parent="temp_ground"]
-position = Vector2(0.500019, 33)
+position = Vector2(622, 242)
 scale = Vector2(28.3191, 1.25)
 texture = ExtResource("2_ptecu")
 region_enabled = true
 region_rect = Rect2(32.1041, 79.8625, 47.7443, 16.0238)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="temp_ground"]
-position = Vector2(0.5, 33)
+position = Vector2(618, 242)
 shape = SubResource("RectangleShape2D_hj28q")
 
 [node name="temp_wall" type="StaticBody2D" parent="."]
+position = Vector2(333, 220)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall"]
 position = Vector2(323.5, -36)
@@ -81,28 +96,95 @@ scale = Vector2(0.625892, 0.0598484)
 texture = ExtResource("3_fq4ei")
 
 [node name="temp_wall_2" type="StaticBody2D" parent="."]
+position = Vector2(-241, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="temp_wall_2"]
-position = Vector2(96.5, -100)
+position = Vector2(425, 137.773)
 shape = SubResource("RectangleShape2D_6fg64")
 
 [node name="Sprite2D" type="Sprite2D" parent="temp_wall_2"]
-position = Vector2(96.25, -100.386)
+position = Vector2(424.75, 137.386)
 scale = Vector2(0.623438, 0.0598484)
 texture = ExtResource("3_fq4ei")
 
 [node name="level_borders" type="StaticBody2D" parent="."]
+position = Vector2(-241, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="level_borders"]
+position = Vector2(630, 204)
 shape = SubResource("SegmentShape2D_xomba")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="level_borders"]
+position = Vector2(630, 204)
 shape = SubResource("SegmentShape2D_iodtc")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="level_borders"]
+position = Vector2(630, 204)
 shape = SubResource("SegmentShape2D_oo4iy")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="PauseMenu" parent="CanvasLayer" instance=ExtResource("5_rfktq")]
 visible = false
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+script = ExtResource("4_f4pg2")
+base_motion_scale = 0.2
+
+[node name="background" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0, 0)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/background"]
+texture_filter = 1
+texture = ExtResource("4_xoyoh")
+centered = false
+
+[node name="mountain1" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 5
+motion_scale = Vector2(0.2, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/mountain1"]
+texture_filter = 1
+texture = ExtResource("5_f4pg2")
+centered = false
+
+[node name="cloud" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 3
+motion_scale = Vector2(0.3, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/cloud"]
+texture_filter = 1
+texture = ExtResource("6_62b6n")
+centered = false
+
+[node name="mountain2" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 4
+motion_scale = Vector2(0.4, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/mountain2"]
+texture_filter = 1
+texture = ExtResource("7_rs4xw")
+centered = false
+
+[node name="mountain3" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 2
+motion_scale = Vector2(0.5, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/mountain3"]
+texture_filter = 1
+texture = ExtResource("8_lk57d")
+centered = false
+
+[node name="cloud 2" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 1
+motion_scale = Vector2(0.6, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/cloud 2"]
+texture_filter = 1
+texture = ExtResource("9_2hkqn")
+centered = false
