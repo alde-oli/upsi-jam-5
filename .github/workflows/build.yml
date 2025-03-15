@@ -1,17 +1,71 @@
-name: "Build Game"
+name: "Release Pipeline"
 
 on:
-  workflow_run:
-    workflows: ["Quality checks"]
-    branches: [main]
-    types:
-      - completed
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (ex: v1.0.0)'
+        required: true
+        type: string
+      deploy_to_itchio:
+        description: 'Deploy to itch.io'
+        required: false
+        default: true
+        type: boolean
+      release_notes:
+        description: 'Release notes'
+        required: false
+        default: ''
+        type: string
 
 jobs:
-  export_game:
-    name: Export Game
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+  check_build_status:
+    name: Check Build Status
+    runs-on: ubuntu-latest
+    outputs:
+      last_build_status: ${{ steps.check_build.outputs.build_status }}
+    steps:
+      - name: Check last build status
+        id: check_build
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Référencer directement le workflow par son chemin
+            const workflowPath = '.github/workflows/build.yml';
+            const branch = 'main';
+            
+            try {
+              const { data: workflowRuns } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflowPath,
+                branch: branch,
+                status: 'completed',
+                per_page: 1
+              });
+              
+              if (workflowRuns.total_count === 0) {
+                core.setFailed('No completed builds found for the main branch');
+                return;
+              }
+              
+              const lastRun = workflowRuns.workflow_runs[0];
+              core.info(`Last build conclusion: ${lastRun.conclusion}, Run ID: ${lastRun.id}`);
+              core.setOutput('build_status', lastRun.conclusion);
+              
+              if (lastRun.conclusion !== 'success') {
+                core.setFailed(`Last build was not successful: ${lastRun.conclusion}`);
+              }
+            } catch (error) {
+              core.error(`Error checking build status: ${error.message}`);
+              core.setFailed('Failed to check build status. Ensure the build workflow exists at the expected path.');
+            }
+
+  export_for_release:
+    name: Export for Release
+    needs: check_build_status
+    if: needs.check_build_status.outputs.last_build_status == 'success'
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
@@ -21,9 +75,10 @@ jobs:
         with:
           lfs: true
           fetch-depth: 0
+          ref: main
 
       - name: Setup directories
-        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/ build/web
+        run: mkdir -p ~/.local/share/godot/export_templates ~/.config/godot/
           
       - name: Install dependencies
         run: apt-get update && apt-get install -y rsync wget unzip
@@ -45,40 +100,128 @@ jobs:
           rm -rf templates templates.tpz
 
       - name: Web Build
-        id: web_build
         run: |
-          echo "Building web export..."
-          godot --headless --export-release "Web" ./build/web/index.html || {
-            echo "::set-output name=build_failed::true"
-            exit 1
-          }
-          echo "Web build completed successfully"
+          mkdir -p build/web
+          godot --headless --export-release "Web" ./build/web/index.html
 
-      - name: Desktop Build (Optional)
-        if: false  # Désactivé par défaut, activez si nécessaire
+      - name: Windows Build
+        run: |
+          mkdir -p build/windows
+          godot --headless --export-release "Windows Desktop" ./build/windows/${GITHUB_REPOSITORY#*/}.exe
+
+      - name: Linux Build
         run: |
           mkdir -p build/linux
-          godot --headless --export-release "Linux/X11" ./build/linux/game.x86_64
-          chmod +x ./build/linux/game.x86_64
-          
-          mkdir -p build/windows
-          godot --headless --export-release "Windows Desktop" ./build/windows/game.exe
+          godot --headless --export-release "Linux/X11" ./build/linux/${GITHUB_REPOSITORY#*/}.x86_64
+          chmod +x ./build/linux/${GITHUB_REPOSITORY#*/}.x86_64
 
-      - name: Upload Web build
-        uses: actions/upload-artifact@v4
+      - name: Create release ZIP files
+        run: |
+          cd build/web && zip -r ../../web-build.zip .
+          cd ../../build/windows && zip -r ../../windows-build.zip .
+          cd ../../build/linux && zip -r ../../linux-build.zip .
+
+      - name: Create Git Tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          git push origin ${{ github.event.inputs.version }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
-          name: web-build
-          path: build/web
-          retention-days: 7
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          body: |
+            ${{ github.event.inputs.release_notes }}
+            
+            This release was created automatically by GitHub Actions.
+          files: |
+            web-build.zip
+            windows-build.zip
+            linux-build.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Call Discord Notifier
         uses: ./.github/actions/discord-notifier
         with:
-          type: 'build'
+          type: 'release'
           status: ${{ job.status }}
-          branch: ${{ github.ref_name }}
+          branch: 'main'
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_BUILD_TEST }}
-          additional_info: "Web build completed and available as an artifact."
+          additional_info: ${{ github.event.inputs.version }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy_to_itchio:
+    name: Deploy to itch.io
+    needs: export_for_release
+    if: github.event.inputs.deploy_to_itchio == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Extract builds
+        run: |
+          mkdir -p build/web build/windows build/linux
+          unzip -o web-build.zip -d build/web/
+          unzip -o windows-build.zip -d build/windows/
+          unzip -o linux-build.zip -d build/linux/
+
+      - name: Deploy Web to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: web
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: build/web
+          VERSION: ${{ github.event.inputs.version }}
+          BUILD_METADATA: github-${{ github.run_id }}
+
+      - name: Deploy Windows to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: windows
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: build/windows
+          VERSION: ${{ github.event.inputs.version }}
+          BUILD_METADATA: github-${{ github.run_id }}
+
+      - name: Deploy Linux to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: linux
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: build/linux
+          VERSION: ${{ github.event.inputs.version }}
+          BUILD_METADATA: github-${{ github.run_id }}
+
+      - name: Call Discord Notifier
+        uses: ./.github/actions/discord-notifier
+        with:
+          type: 'deploy'
+          status: ${{ job.status }}
+          branch: 'main'
+          commit: ${{ github.sha }}
+          actor: ${{ github.actor }}
+          run_id: ${{ github.run_id }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          itch_user: ${{ secrets.ITCH_USER }}
+          itch_game: ${{ secrets.ITCH_GAME }}
