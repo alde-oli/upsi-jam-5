@@ -20,6 +20,8 @@ class_name Player
 @export var dash_force: float = 2000.0
 @export var dash_duration: float = 0.2
 
+@export var life = 1
+
 # Variables d'état pour le joueur
 var jump_count: int = 0
 var input_direction: float = 0.0
@@ -28,10 +30,20 @@ var facing_direction: float = 1.0  # 1 pour droite, -1 pour gauche
 
 func _ready():
 	# Initialiser les managers et la state machine
+	update_life_ui()
 	input_manager.init(self)
 	anim_manager.init(self)
 	state_machine.init(self, input_manager, anim_manager)
 
+func	 update_life_ui():
+	$Label.text = "life: " + str(life)
+
+func take_damage():
+	print("take damage")
+	life -= 1
+	update_life_ui()
+	if life < 1:
+		print(str(life))
 
 func _physics_process(delta):
 	# La logique est maintenant gérée par la state machine
