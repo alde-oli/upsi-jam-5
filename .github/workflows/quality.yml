@@ -48,17 +48,15 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        if: failure() || steps.gdlint.outputs.lint_failed == 'true' ||  'true' == 'true'
         uses: ./.github/actions/discord-notifier
         with:
-          type: 'build'
-          status: 'failure'
+          type: 'lint'
+          status: ${{ steps.gdlint.outputs.lint_failed == 'true' && 'failure' || 'success' }}
           branch: ${{ github.ref_name }}
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          additional_info: "Lint issues detected. See report for details."
+        
 
   format:
     name: Format Code
@@ -97,17 +95,14 @@ jobs:
           retention-days: 7
       
       - name: Call Discord Notifier
-        if: failure() || steps.gdformat.outputs.format_failed == 'true'
         uses: ./.github/actions/discord-notifier
         with:
-          type: 'build'
-          status: 'failure'
+          type: 'format'
+          status: ${{ steps.gdformat.outputs.format_failed == 'true' && 'failure' || 'success' }}
           branch: ${{ github.ref_name }}
           commit: ${{ github.sha }}
           actor: ${{ github.actor }}
           run_id: ${{ github.run_id }}
-          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          additional_info: "Format issues detected. See report for details."
 
   test:
     name: Run Tests

@@ -107,6 +107,25 @@ runs:
           echo "description=${TEST_STATS}Tests failed on branch ${{ inputs.branch }}.\n\nCommit: ${{ inputs.commit }}\nAuthor: ${{ inputs.actor }}\n\n[View Test Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }})" >> $GITHUB_OUTPUT
         fi
     
+    - name: Prepare Quality Notification
+      if: inputs.type == 'quality'
+      id: quality_notification
+      shell: bash
+      run: |
+        if [[ "${{ inputs.status }}" == "success" ]]; then
+          echo "title=🔍 Quality Checks Passed" >> $GITHUB_OUTPUT
+          echo "color=0x44FF44" >> $GITHUB_OUTPUT
+          echo "description=Quality checks passed on branch ${{ inputs.branch }}.\n\nCommit: ${{ inputs.commit }}\nAuthor: ${{ inputs.actor }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ inputs.status }}" == "cancelled" ]]; then
+          echo "title=⚠️ Quality Checks Cancelled" >> $GITHUB_OUTPUT
+          echo "color=0xFFAA00" >> $GITHUB_OUTPUT
+          echo "description=Quality checks were cancelled on branch ${{ inputs.branch }}.\n\nCommit: ${{ inputs.commit }}\nAuthor: ${{ inputs.actor }}" >> $GITHUB_OUTPUT
+        else
+          echo "title=❌ Quality Checks Failed" >> $GITHUB_OUTPUT
+          echo "color=0xFF0000" >> $GITHUB_OUTPUT
+          echo "description=Quality checks failed on branch ${{ inputs.branch }}.\n\nCommit: ${{ inputs.commit }}\nAuthor: ${{ inputs.actor }}\n\n[View Quality Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }})" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Prepare Deploy Notification
       if: inputs.type == 'deploy'
       id: deploy_notification

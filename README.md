@@ -1,6 +1,6 @@
 ## Releases
 
-[![Create Release](https://img.shields.io/badge/Create%20Release-Deploy%20Game-blue?style=for-the-badge&logo=github)](https://github.com/VOTRE_UTILISATEUR/VOTRE_REPO/actions/workflows/release.yml)
+[![Create Release](https://img.shields.io/badge/Create%20Release-Deploy%20Game-blue?style=for-the-badge&logo=github)](https://github.com/alde-oli/upsi-jam-5/actions/workflows/release.yml)
 
 Pour créer une nouvelle release:
 1. Cliquez sur le badge ci-dessus
