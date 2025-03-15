@@ -1,14 +1,16 @@
-[gd_scene load_steps=47 format=3 uid="uid://cmna7jwwrc4a2"]
+[gd_scene load_steps=51 format=3 uid="uid://cmna7jwwrc4a2"]
 
 [ext_resource type="Script" uid="uid://oo73w74x83o1" path="res://Scripts/Player/player.gd" id="1_vajw0"]
+[ext_resource type="PackedScene" uid="uid://dorj5u7uikt17" path="res://Scenes/Player/Clone.tscn" id="2_74mp2"]
+[ext_resource type="PackedScene" uid="uid://c7lyx0ut3c3yx" path="res://Scenes/Player/Chain.tscn" id="3_oikmp"]
 [ext_resource type="Script" uid="uid://bfly8dd4o27wp" path="res://Scripts/Player/anim_manager.gd" id="3_yag5l"]
 [ext_resource type="Script" uid="uid://g5fub88q04am" path="res://Scripts/Player/input_manager.gd" id="4_j2l22"]
-[ext_resource type="Texture2D" uid="uid://dq8bbbjoql1j0" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://ddlqdeusjxslh" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
+[ext_resource type="Texture2D" uid="uid://d2jbfpdosygvs" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://vgvu8vs1ayi5" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
 [ext_resource type="Script" uid="uid://cayeealv3lvww" path="res://Scripts/Player/state_machine.gd" id="5_t7wdw"]
-[ext_resource type="Texture2D" uid="uid://bytib52qdpun5" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://cq1p8olbycfc0" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
-[ext_resource type="Texture2D" uid="uid://d164jamvpicle" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
+[ext_resource type="Texture2D" uid="uid://c1wc40o5x5x0s" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://diys512mvxwg3" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
+[ext_resource type="Texture2D" uid="uid://creq0ahk0j5g0" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_u7k3r"]
 radius = 6.0
@@ -49,6 +51,10 @@ region = Rect2(336, 0, 48, 48)
 [sub_resource type="AtlasTexture" id="AtlasTexture_h5u0x"]
 atlas = ExtResource("5_gk6dx")
 region = Rect2(384, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mwii3"]
+atlas = ExtResource("6_gk6dx")
+region = Rect2(240, 0, 48, 48)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_oikmp"]
 atlas = ExtResource("5_jlvik")
@@ -186,6 +192,14 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_mwii3")
+}],
+"loop": true,
+"name": &"fall",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_oikmp")
 }, {
 "duration": 1.0,
@@ -292,6 +306,9 @@ initial_velocity_min = 15.0
 initial_velocity_max = 109.99
 gravity = Vector3(0, 98, 0)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_gk6dx"]
+radius = 15.0333
+
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_vajw0")
 max_speed = 600.0
@@ -301,6 +318,8 @@ can_wall_jump = true
 can_dash = true
 dash_force = 1000.0
 dash_duration = 0.1
+clone_scene = ExtResource("2_74mp2")
+chain_scene = ExtResource("3_oikmp")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 8)
@@ -318,7 +337,7 @@ script = ExtResource("5_t7wdw")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 4)
 sprite_frames = SubResource("SpriteFrames_2jnj1")
-animation = &"wall_slide"
+animation = &"fall"
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
 visible = false
@@ -329,3 +348,9 @@ trail_lifetime = 0.2
 trail_sections = 5
 trail_section_subdivisions = 1
 process_material = SubResource("ParticleProcessMaterial_jlvik")
+
+[node name="MergeArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MergeArea"]
+position = Vector2(0, 5)
+shape = SubResource("CircleShape2D_gk6dx")
