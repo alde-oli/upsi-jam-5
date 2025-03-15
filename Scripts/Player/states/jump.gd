@@ -26,9 +26,9 @@ func process(delta):
 	# Vérifier les transitions vers d'autres états
 	
 	# Vérifier si le mur est disponible pour un wall slide
-	if player.can_wall_jump and player.is_on_wall() and direction != 0:
-		state_machine.change_state(StateMachine.WALL_SLIDE)
-		return
+	#if player.can_wall_jump and player.is_on_wall() and direction != 0:
+	#	state_machine.change_state(StateMachine.WALL_SLIDE)
+	#	return
 	
 	# Si le joueur demande un dash et que le dash est disponible
 	if player.can_dash and input_manager.is_dash_pressed():
