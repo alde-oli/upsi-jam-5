@@ -19,7 +19,7 @@ func on_start():
 	pass
 
 
-func process(delta):
+func process(_delta):
 	pass
 
 

@@ -34,8 +34,6 @@ func process(delta):
 				state_machine.change_state(StateMachine.RUN)
 			else:
 				state_machine.change_state(StateMachine.IDLE)
-		else:
-			state_machine.change_state(StateMachine.FALL)
 		return
 
 

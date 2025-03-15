@@ -29,15 +29,17 @@ func process(delta):
 	#if player.can_wall_jump and player.is_on_wall() and direction != 0:
 	#	state_machine.change_state(StateMachine.WALL_SLIDE)
 	#	return
-	
+		# Si le joueur touche le sol
+	if player.is_on_floor():
+		# Si le joueur se déplace, passer à l'état de course, sinon à l'état idle
+		if direction != 0:
+			state_machine.change_state(StateMachine.RUN)
+		else:
+			state_machine.change_state(StateMachine.IDLE)
+		return
 	# Si le joueur demande un dash et que le dash est disponible
 	if player.can_dash and input_manager.is_dash_pressed():
 		state_machine.change_state(StateMachine.DASH)
-		return
-	
-	# Si le joueur commence à tomber (vélocité verticale positive)
-	if player.velocity.y >= 0:
-		state_machine.change_state(StateMachine.FALL)
 		return
 	
 	# Si le joueur appuie à nouveau sur sauter et a des sauts restants

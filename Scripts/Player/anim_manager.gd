@@ -21,8 +21,6 @@ func update_animation(state_name: String):
 			play("run")  # "walk" utilisé dans le script original
 		"jump":
 			play("jump")
-		"fall":
-			play("fall")
 		"dash":
 			play("dash")  # Il faudra peut-être créer cette animation
 		"wall_slide":

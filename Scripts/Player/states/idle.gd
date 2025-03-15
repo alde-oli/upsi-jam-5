@@ -30,11 +30,6 @@ func process(delta):
 		state_machine.change_state(StateMachine.RUN)
 		return
 	
-	# Si le joueur n'est plus au sol
-	if not player.is_on_floor():
-		state_machine.change_state(StateMachine.FALL)
-		return
-	
 	# Dans l'état idle, on s'assure que la vitesse horizontale est à 0
 	player.velocity.x = 0
 

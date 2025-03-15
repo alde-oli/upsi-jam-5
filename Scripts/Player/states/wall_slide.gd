@@ -28,11 +28,6 @@ func process(delta):
 	
 	# Vérifier les transitions vers d'autres états
 	
-	# Si le joueur n'est plus contre un mur
-	if not player.is_on_wall():
-		state_machine.change_state(StateMachine.FALL)
-		return
-	
 	# Si le joueur touche le sol
 	if player.is_on_floor():
 		state_machine.change_state(StateMachine.IDLE)

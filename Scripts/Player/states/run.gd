@@ -31,12 +31,7 @@ func process(delta):
 	if direction == 0:
 		state_machine.change_state(StateMachine.IDLE)
 		return
-	
-	# Si le joueur n'est plus au sol
-	if not player.is_on_floor():
-		state_machine.change_state(StateMachine.FALL)
-		return
-	
+
 	# Appliquer le mouvement horizontal
 	apply_movement(delta, direction)
 

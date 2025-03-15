@@ -27,7 +27,6 @@ func init(p: Player, im: InputManager, am: AnimManager):
 	states[IDLE] = preload("res://Scripts/Player/states/idle.gd").new()
 	states[RUN] = preload("res://Scripts/Player/states/run.gd").new()
 	states[JUMP] = preload("res://Scripts/Player/states/jump.gd").new()
-	states[FALL] = preload("res://Scripts/Player/states/fall.gd").new()
 	
 	# Ajouter les états optionnels si activés
 	if player.can_dash:

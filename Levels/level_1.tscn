@@ -1,6 +1,6 @@
 [gd_scene load_steps=17 format=4 uid="uid://bd1hsmn67cy68"]
 
-[ext_resource type="Script" path="res://Scripts/level_1.gd" id="1_syshm"]
+[ext_resource type="Script" uid="uid://b763p2m8bvmm1" path="res://Scripts/level_1.gd" id="1_syshm"]
 [ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
 [ext_resource type="Texture2D" uid="uid://dtgi6ebapwwva" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
 [ext_resource type="PackedScene" uid="uid://cc8bkqlws8bno" path="res://Scenes/Ennemis/Pike.tscn" id="2_rfktq"]
