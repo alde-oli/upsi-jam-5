@@ -11,7 +11,7 @@ func on_start():
 func process(delta):
 	# Appliquer la gravité
 	apply_gravity(delta)
-	
+	player.velocity.y = 0
 	# Vérifier les transitions vers d'autres états
 	var direction = input_manager.get_movement_direction()
 	

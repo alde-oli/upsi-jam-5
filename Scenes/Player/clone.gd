@@ -47,8 +47,9 @@ func _physics_process(delta):
 		var direction = (player.global_position - global_position).normalized()
 		velocity = direction * drag_force
 	else:
-		# Appliquer la gravité
-		velocity.y += gravity * delta	
+		velocity.y += gravity * delta
+	if velocity.y > gravity and not player.is_dragging_clone:
+		velocity.y = gravity
 	# Mettre à jour l'animation en fonction de l'état
 	update_animation()
 	# Appliquer le mouvement

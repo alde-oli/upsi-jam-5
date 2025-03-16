@@ -36,7 +36,9 @@ var max_chain_length = 100.0  # Distance maximale entre le joueur et le clone
 var fusion_timer: float = 0.0  # Timer pour la fusion
 @export var fusion_snap_distance: float = 25.0  # Distance à laquelle on "snap" automatiquement
 @export var fusion_max_time: float = 1.5  # Temps maximum avant fusion forcée
-
+# For the chain constraint timer
+@export var is_chain_constraint_disabled = false
+@export var chain_constraint_timer = 0.0
 @export var life = 1
 
 # Variables d'état pour le joueur
@@ -63,12 +65,91 @@ func take_damage():
 	if life < 1:
 		print(str(life))
 		get_tree().change_scene_to_file("res://Scenes/GameOver.tscn")
-
+func process_grapple_physics(delta):
+	# Skip if clone isn't active
+	if !is_clone_active or !is_instance_valid(clone):
+		return
+		
+	# Get positions
+	var player_pos = global_position
+	var clone_pos = clone.global_position
+	
+	# Calculate distance and direction between player and clone
+	var to_clone = clone_pos - player_pos
+	var distance = to_clone.length()
+	
+	# Check if player is too far from clone (beyond a threshold)
+	if distance > max_chain_length * 2:  # Arbitrary threshold, adjust as needed
+		return
+	
+	# Calculate vertical relationship
+	var is_player_below = player_pos.y > clone_pos.y
+	
+	# Skip if player is above the clone
+	if !is_player_below:
+		return
+		
+	# Apply gravity to clone
+	clone.velocity.y += gravity * delta * 0.5  # Reduced gravity factor for slower fall
+	clone.global_position += clone.velocity * delta
+	
+	var direction = to_clone.normalized()
+	
+	# Handle space key jump/boost
+	if Input.is_action_just_pressed("jump") and distance >= max_chain_length * 0.9:
+		# Apply upward boost
+		velocity.y = -300  # Adjust jump strength as needed
+		velocity.x -= direction.x * 1000  # Add some horizontal momentum in swing direction
+		
+		# Set timer to disable chain constraint temporarily
+		is_chain_constraint_disabled = true
+		chain_constraint_timer = 3.0  # 3 seconds
+	
+	# Update chain constraint timer
+	if is_chain_constraint_disabled:
+		chain_constraint_timer -= delta
+		if chain_constraint_timer <= 0:
+			is_chain_constraint_disabled = false
+			chain_constraint_timer = 0
+	
+	# Only apply swing physics if we're at or beyond max chain length AND constraint is not disabled
+	if distance <= max_chain_length * 1.2 and distance >= max_chain_length and !is_chain_constraint_disabled:
+		# Calculate overshoot
+		var overshoot = distance - max_chain_length
+		
+		# Move player toward clone to maintain maximum chain length
+		global_position += direction * overshoot
+		
+		# Calculate tangential direction for swing (perpendicular to rope)
+		var tangent = Vector2(-direction.y, direction.x)
+		
+		# Project current velocity onto tangent direction
+		var current_tangent_velocity = velocity.dot(tangent)
+		
+		# Apply pendulum physics - acceleration due to gravity in tangential direction
+		var pendulum_acceleration = gravity * direction.x  # Component of gravity along swing arc
+		
+		# Update velocity - keep only the tangential component
+		velocity = tangent * current_tangent_velocity
+		
+		# Add pendulum acceleration
+		velocity += tangent * pendulum_acceleration * delta
+		
+		# Add a bit of velocity along the rope direction to simulate pulling
+		velocity += direction * (overshoot * 4)
+	else:
+		# Regular falling when not at max chain length or constraint is disabled
+		velocity.y += gravity * delta
+	
+	# Apply velocity
+	move_and_slide()
+	
 func _physics_process(delta):
 	if is_clone_active:
 		scale = Vector2(0.4, 0.4)
 		animated_sprite_b.visible = true
 		animated_sprite_bw.visible = false
+		process_grapple_physics(delta)
 		#$Sprite2D.texture = active_sprite
 	else:
 		scale = Vector2(0.7, 0.7)
@@ -114,29 +195,21 @@ func spawn_clone():
 		clone = clone_scene.instantiate()
 		get_parent().add_child(clone)
 		clone.connect("fusion_requested", Callable(self, "_on_clone_fusion_requested"))
-	
 	# Get mouse position in world space
 	var world_mouse_position = get_global_mouse_position()
-	
 	# Calculate direction vector from player to mouse
 	var dir_vector = world_mouse_position - global_position
-	
 	# Handle case where mouse is exactly on player
 	if dir_vector.length() < 0.001:
 		dir_vector = Vector2(1, 0)  # Default direction
-	
 	# Normalize to get unit direction
 	var direction = dir_vector.normalized()
-	
 	# Calculate new position at fixed distance (max_chain_length) from player
 	var spawn_position = global_position + (direction * max_chain_length)
-	
 	# Set clone position directly at the calculated position
 	clone.global_position = spawn_position
-	
 	# Set velocity to zero or minimal value if needed for animation
 	clone.velocity = Vector2.ZERO
-	
 	# Activate the clone at the new position
 	clone.activate(spawn_position, direction, self)
 	is_clone_active = true
@@ -157,6 +230,8 @@ func complete_fusion():
 	is_dragging_clone = false
 	
 	if clone:
+		is_chain_constraint_disabled = false
+		chain_constraint_timer = 0.0
 		clone.deactivate()
 	
 	is_clone_active = false

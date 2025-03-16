@@ -28,7 +28,7 @@ func _process(delta):
 		collision_timer += delta
 		
 		# If we've been colliding for more than 1 second
-		if collision_timer >= 1.0:
+		if collision_timer >= 0:
 			if get_parent().has_method("complete_fusion"):
 				get_parent().complete_fusion()
 				# Reset after calling to prevent multiple calls
