@@ -4,10 +4,10 @@ class_name Clone
 signal fusion_requested(is_player_fusion: bool)
 
 @export var max_speed: float = 800.0
-@export var deceleration: float = 1000.0
+@export var deceleration: float = 3000.0
 @export var gravity: int = 980
 @export var drag_force: float = 200.0
-@export var fusion_speed: float = 1500.0
+@export var fusion_speed: float = 200.0
 @export var fusion_snap_distance: float = 25.0  # Distance à laquelle on "snap" automatiquement
 
 var player: Player = null
@@ -99,7 +99,7 @@ func update_animation():
 	elif velocity.y < 0:
 		$AnimatedSprite2D.play("jump")
 	elif velocity.y > 0:
-		$AnimatedSprite2D.play("fall")
+		$AnimatedSprite2D.play("jump")
 	elif abs(velocity.x) > 50:
 		$AnimatedSprite2D.play("run")
 	else:
