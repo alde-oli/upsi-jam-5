@@ -3,8 +3,8 @@ class_name AnimManager
 
 var player: Player
 var current_state_name: String = ""
-@onready var animation_player = $"../AnimatedSprite2D"  # Correspond au nom dans le script original
-
+@onready var animation_player_bl = $"../AnimatedSprite2D_BlackWhite"  # Correspond au nom dans le script original
+@onready var animation_player_b = $"../AnimatedSprite2D_Black" 
 
 func init(p: Player):
 	player = p
@@ -34,19 +34,20 @@ func update_animation(state_name: String):
 
 
 func play(anim_name: String):
-	if animation_player:
-		animation_player.play(anim_name)
+	if animation_player_bl && animation_player_b:
+		animation_player_bl.play(anim_name)
+		animation_player_b.play(anim_name)
 	else:
 		print("Animation player not found")
 
 
 func is_playing() -> bool:
-	if animation_player:
-		return animation_player.is_playing()
+	if animation_player_bl && animation_player_b:
+		return animation_player_bl.is_playing() && animation_player_b.is_playing()
 	return false
 
 
 func get_current_animation() -> String:
-	if animation_player:
-		return animation_player.current_animation
+	if animation_player_bl && animation_player_b:
+		return animation_player_bl.current_animation
 	return ""

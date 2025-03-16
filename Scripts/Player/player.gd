@@ -4,7 +4,8 @@ class_name Player
 @onready var state_machine = $StateMachine
 @onready var input_manager = $InputManager
 @onready var anim_manager = $AnimManager
-@onready var animated_sprite = $AnimatedSprite2D
+@onready var animated_sprite_bw = $AnimatedSprite2D_BlackWhite
+@onready var animated_sprite_b = $AnimatedSprite2D_Black
 
 # Variables exportées pour les réglages dans l'éditeur
 @export var max_speed: float = 1000.0
@@ -78,6 +79,16 @@ func take_damage():
 		get_tree().change_scene_to_file("res://Scenes/Game_over_test.tscn")
 
 func _physics_process(delta):
+	if is_clone_active:
+		scale = Vector2(0.4, 0.4)
+		animated_sprite_b.visible = true
+		animated_sprite_bw.visible = false
+		#$Sprite2D.texture = active_sprite
+	else:
+		scale = Vector2(0.7, 0.7)
+		animated_sprite_b.visible = false
+		animated_sprite_bw.visible = true
+		#$Sprite2D.texture = inactive_sprite
 	# La logique est maintenant gérée par la state machine
 	input_direction = input_manager.get_movement_direction()
 	var camera = get_parent().get_node("Camera2D")
@@ -88,7 +99,8 @@ func _physics_process(delta):
 	# Mettre à jour l'orientation du sprite si nécessaire
 	if input_direction != 0:
 		facing_direction = input_direction
-		animated_sprite.flip_h = (facing_direction < 0)
+		animated_sprite_bw.flip_h = (facing_direction < 0)
+		animated_sprite_b.flip_h = (facing_direction < 0)
 	
 	# Gérer les entrées pour la mécanique de clone
 	process_clone_inputs()

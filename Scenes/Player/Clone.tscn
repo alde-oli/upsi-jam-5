@@ -160,7 +160,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"jump",
-"speed": 5.0
+"speed": 6.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -200,7 +200,7 @@ height = 26.0
 radius = 17.1172
 
 [node name="Clone" type="CharacterBody2D"]
-scale = Vector2(0.7, 0.7)
+scale = Vector2(0.4, 0.4)
 collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_ygbde")
