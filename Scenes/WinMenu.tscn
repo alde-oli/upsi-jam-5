@@ -10,12 +10,12 @@
 offsets = PackedFloat32Array(0, 0.508197, 1)
 colors = PackedColorArray(0.547496, 0.0703442, 0.412671, 1, 0.721569, 0.431373, 0.603922, 1, 0.795312, 0.630347, 0.97464, 1)
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_0u5us"]
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fu86e"]
 gradient = SubResource("Gradient_ufayh")
 fill_from = Vector2(0, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0qixp"]
-texture = SubResource("GradientTexture2D_0u5us")
+texture = SubResource("GradientTexture2D_fu86e")
 modulate_color = Color(0.735286, 0.832472, 0.98979, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_5paj2"]
