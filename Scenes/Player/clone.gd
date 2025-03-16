@@ -72,27 +72,11 @@ func update_animation():
 	if velocity.x != 0:
 		$AnimatedSprite2D.flip_h = (velocity.x < 0)
 
-func start_player_drag():
-	is_dragging_player = true
-
-func stop_player_drag():
-	is_dragging_player = false
-
 func start_being_dragged():
 	is_being_dragged = true
 
 func stop_being_dragged():
 	is_being_dragged = false
-
-func start_fusion(is_player_fusion: bool):
-	is_fusing = true
-	fusion_timer = 0.0
-	if is_player_fusion:
-		# Si c'est le joueur qui initie la fusion, le clone se déplace vers le joueur
-		target_position = player.global_position
-	else:
-		# Si c'est le clone qui initie la fusion, informer le joueur
-		emit_signal("fusion_requested", true)
 
 func deactivate():
 	# Désactiver le clone
