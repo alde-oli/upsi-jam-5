@@ -1,10 +1,10 @@
 [gd_scene load_steps=33 format=3 uid="uid://cjtitsr8o7bix"]
 
-[ext_resource type="Texture2D" uid="uid://csfvnl5tneo1r" path="res://Sprites/Player/White/White player idle 48x48.png" id="1_a5uch"]
+[ext_resource type="Texture2D" uid="uid://drxgusw4iga4v" path="res://Sprites/Player/White/White player idle 48x48.png" id="1_a5uch"]
 [ext_resource type="Script" uid="uid://dsdf8423vxy72" path="res://Scenes/Player/clone.gd" id="1_ygbde"]
-[ext_resource type="Texture2D" uid="uid://dwuankk1cnid3" path="res://Sprites/Player/White/White player jump 48x48.png" id="3_67gig"]
-[ext_resource type="Texture2D" uid="uid://brojl7tfg66jn" path="res://Sprites/Player/White/White player run 48x48.png" id="4_56goo"]
-[ext_resource type="Script" path="res://Scenes/Player/area_clone_colision_with_player.gd" id="5_67gig"]
+[ext_resource type="Texture2D" uid="uid://fjfar7uay7nh" path="res://Sprites/Player/White/White player jump 48x48.png" id="3_67gig"]
+[ext_resource type="Texture2D" uid="uid://dhy602cpxeuut" path="res://Sprites/Player/White/White player run 48x48.png" id="4_56goo"]
+[ext_resource type="Script" uid="uid://cbbo2dqeisuq1" path="res://Scenes/Player/area_clone_colision_with_player.gd" id="5_67gig"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6axpw"]
 atlas = ExtResource("1_a5uch")
