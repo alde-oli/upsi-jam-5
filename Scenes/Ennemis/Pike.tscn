@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cc8bkqlws8bno"]
 
 [ext_resource type="Script" uid="uid://cfrvxv7jxyrlt" path="res://Scripts/Ennemis/pike.gd" id="1_fwn2b"]
-[ext_resource type="Texture2D" uid="uid://i8niubvwjqgl" path="res://Sprites/Enemies/triangle.png" id="2_fwn2b"]
+[ext_resource type="Texture2D" uid="uid://ckr2g618td4v6" path="res://Sprites/Enemies/triangle.png" id="2_fwn2b"]
 
 [node name="Pike" type="Area2D"]
 script = ExtResource("1_fwn2b")
