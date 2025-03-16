@@ -44,6 +44,7 @@ func take_damage():
 	update_life_ui()
 	if life < 1:
 		print(str(life))
+		get_tree().change_scene_to_file("res://Scenes/Game_over_test.tscn")
 
 func _physics_process(delta):
 	# La logique est maintenant gérée par la state machine

@@ -3,12 +3,12 @@
 [ext_resource type="Script" uid="uid://oo73w74x83o1" path="res://Scripts/Player/player.gd" id="1_vajw0"]
 [ext_resource type="Script" uid="uid://bfly8dd4o27wp" path="res://Scripts/Player/anim_manager.gd" id="3_yag5l"]
 [ext_resource type="Script" uid="uid://g5fub88q04am" path="res://Scripts/Player/input_manager.gd" id="4_j2l22"]
-[ext_resource type="Texture2D" uid="uid://dq8bbbjoql1j0" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://ddlqdeusjxslh" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
+[ext_resource type="Texture2D" uid="uid://lcg2rvpr7a56" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://dsk6io3m1otyl" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
 [ext_resource type="Script" uid="uid://cayeealv3lvww" path="res://Scripts/Player/state_machine.gd" id="5_t7wdw"]
-[ext_resource type="Texture2D" uid="uid://bytib52qdpun5" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://cq1p8olbycfc0" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
-[ext_resource type="Texture2D" uid="uid://d164jamvpicle" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
+[ext_resource type="Texture2D" uid="uid://g6t331m05vme" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://c3uwowh4j2l6r" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
+[ext_resource type="Texture2D" uid="uid://ct8rf44l4k8sd" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_u7k3r"]
 radius = 6.0
