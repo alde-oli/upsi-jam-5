@@ -4,7 +4,7 @@ extends Control
 @onready var label: Label = $ScoreLabel
 func _ready() -> void:
 	update_score_ui()
-	$NextButton.grab_focus()
+	$MenuButton.grab_focus()
 	
 func	 update_score_ui():
 	var minutes = int(GameData.elapsed_time) / 60
