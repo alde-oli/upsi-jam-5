@@ -1,8 +1,10 @@
-[gd_scene load_steps=47 format=3 uid="uid://cmna7jwwrc4a2"]
+[gd_scene load_steps=48 format=3 uid="uid://cmna7jwwrc4a2"]
 
 [ext_resource type="Script" uid="uid://oo73w74x83o1" path="res://Scripts/Player/player.gd" id="1_vajw0"]
+[ext_resource type="PackedScene" uid="uid://cjtitsr8o7bix" path="res://Scenes/Player/Clone.tscn" id="2_jhyir"]
 [ext_resource type="Script" uid="uid://bfly8dd4o27wp" path="res://Scripts/Player/anim_manager.gd" id="3_yag5l"]
 [ext_resource type="Script" uid="uid://g5fub88q04am" path="res://Scripts/Player/input_manager.gd" id="4_j2l22"]
+
 [ext_resource type="Texture2D" uid="uid://lcg2rvpr7a56" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
 [ext_resource type="Texture2D" uid="uid://dsk6io3m1otyl" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
 [ext_resource type="Script" uid="uid://cayeealv3lvww" path="res://Scripts/Player/state_machine.gd" id="5_t7wdw"]
@@ -301,6 +303,9 @@ can_wall_jump = true
 can_dash = true
 dash_force = 1000.0
 dash_duration = 0.1
+clone_scene = ExtResource("2_jhyir")
+chain_segment_count = 2
+chain_segment_length = 2.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 8)
@@ -318,7 +323,7 @@ script = ExtResource("5_t7wdw")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 4)
 sprite_frames = SubResource("SpriteFrames_2jnj1")
-animation = &"wall_slide"
+animation = &"idle"
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
 visible = false
