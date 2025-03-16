@@ -1,0 +1,183 @@
+[gd_scene load_steps=23 format=4 uid="uid://bd1hsmn67cy68"]
+
+[ext_resource type="Script" uid="uid://b763p2m8bvmm1" path="res://Scripts/level_1.gd" id="1_syshm"]
+[ext_resource type="PackedScene" uid="uid://cmna7jwwrc4a2" path="res://Scenes/Player/player.tscn" id="1_yyxgn"]
+[ext_resource type="Texture2D" uid="uid://bu7dy2l6mbyyf" path="res://Sprites/Environment/background_sprite_2.png" id="2_ptecu"]
+[ext_resource type="PackedScene" uid="uid://cc8bkqlws8bno" path="res://Scenes/Ennemis/Pike.tscn" id="2_rfktq"]
+[ext_resource type="PackedScene" uid="uid://s3rqq6qks78t" path="res://Scenes/Equipment/Finish_object.tscn" id="3_34erp"]
+[ext_resource type="Script" uid="uid://cdxrs3ycypkwk" path="res://Levels/parallax_background.gd" id="4_f4pg2"]
+[ext_resource type="Texture2D" uid="uid://d2qmuv1blorr4" path="res://Sprites/Environment/ParallaxBackground/0Background.png" id="4_xoyoh"]
+[ext_resource type="PackedScene" uid="uid://ceanj73jvlemk" path="res://Scenes/Player/Timer.tscn" id="5_2hkqn"]
+[ext_resource type="Texture2D" uid="uid://c6haotywlobmc" path="res://Sprites/Environment/ParallaxBackground/1Mountains Front.png" id="5_f4pg2"]
+[ext_resource type="Texture2D" uid="uid://cxypa32jxk2wk" path="res://Sprites/Environment/ParallaxBackground/2Clouds mid.png" id="6_62b6n"]
+[ext_resource type="PackedScene" uid="uid://c68ripskkce86" path="res://Scenes/PauseMenu.tscn" id="7_c7pbv"]
+[ext_resource type="Texture2D" uid="uid://610v85mvlhi1" path="res://Sprites/Environment/ParallaxBackground/3MountainMid.png" id="7_rs4xw"]
+[ext_resource type="Texture2D" uid="uid://cp7dx4a85lcfb" path="res://Sprites/Environment/ParallaxBackground/4MountainsBack.png" id="8_lk57d"]
+[ext_resource type="Texture2D" uid="uid://c1uav0wrkguih" path="res://Sprites/Environment/ParallaxBackground/5Clouds Back.png" id="9_2hkqn"]
+[ext_resource type="Texture2D" uid="uid://cw4doevedfhl0" path="res://Scenes/Equipment/tilemap.png" id="13_lk57d"]
+[ext_resource type="Texture2D" uid="uid://d2m00g36tlq35" path="res://Sprites/Environment/Caisses.png" id="15_c7pbv"]
+[ext_resource type="Texture2D" uid="uid://xxcqodhx6oia" path="res://Sprites/Environment/Wall.png" id="16_77l7m"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_lk57d"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1rr3k"]
+texture = ExtResource("15_c7pbv")
+texture_region_size = Vector2i(16, 8)
+2:5/0 = 0
+2:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4, -8, -4)
+1:3/0 = 0
+1:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4, -8, -4)
+2:4/0 = 0
+2:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hsj5a"]
+texture = ExtResource("16_77l7m")
+texture_region_size = Vector2i(16, 8)
+1:4/0 = 0
+1:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4)
+1:5/0 = 0
+1:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2hkqn"]
+texture = ExtResource("13_lk57d")
+margins = Vector2i(0, 8)
+separation = Vector2i(0, 8)
+texture_region_size = Vector2i(16, 8)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -4, -8, 4, 8, 4, 8, -4)
+2:2/0 = 0
+2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 4, 8, 4, 8, -4, -8, -4)
+
+[sub_resource type="TileSet" id="TileSet_2hkqn"]
+tile_size = Vector2i(16, 8)
+physics_layer_0/collision_layer = 1
+sources/4 = SubResource("TileSetAtlasSource_2hkqn")
+sources/0 = SubResource("TileSetAtlasSource_1rr3k")
+sources/1 = SubResource("TileSetAtlasSource_hsj5a")
+
+[node name="level_1" type="Node2D"]
+script = ExtResource("1_syshm")
+
+[node name="Pike" parent="." instance=ExtResource("2_rfktq")]
+position = Vector2(-118, 14)
+
+[node name="Pike2" parent="." instance=ExtResource("2_rfktq")]
+position = Vector2(110, 15)
+
+[node name="Pike3" parent="." instance=ExtResource("2_rfktq")]
+position = Vector2(76, 225)
+
+[node name="FinishObject" parent="." instance=ExtResource("3_34erp")]
+position = Vector2(1042, 224)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+z_index = 99
+position = Vector2(198, 170)
+offset = Vector2(0, -50)
+
+[node name="Player" parent="." instance=ExtResource("1_yyxgn")]
+position = Vector2(198, 170)
+scale = Vector2(0.7, 0.7)
+max_speed = 300.0
+acceleration = 500.0
+jump_force = 250
+
+[node name="Label" type="Label" parent="Player"]
+offset_left = -141.0
+offset_top = -80.0
+offset_right = -101.0
+offset_bottom = -57.0
+
+[node name="temp_ground" type="StaticBody2D" parent="."]
+position = Vector2(-241, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="temp_ground"]
+position = Vector2(622, 242)
+scale = Vector2(28.3191, 1.25)
+texture = ExtResource("2_ptecu")
+region_enabled = true
+region_rect = Rect2(32.1041, 79.8625, 47.7443, 16.0238)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="temp_ground"]
+position = Vector2(620, 231)
+shape = SubResource("WorldBoundaryShape2D_lk57d")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Timer" parent="CanvasLayer" instance=ExtResource("5_2hkqn")]
+
+[node name="PauseMenu" parent="CanvasLayer" instance=ExtResource("7_c7pbv")]
+visible = false
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+script = ExtResource("4_f4pg2")
+base_motion_scale = 0.2
+
+[node name="background" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0, 0)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/background"]
+texture_filter = 1
+texture = ExtResource("4_xoyoh")
+centered = false
+
+[node name="mountain1" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 5
+motion_scale = Vector2(0.2, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/mountain1"]
+texture_filter = 1
+texture = ExtResource("5_f4pg2")
+centered = false
+
+[node name="cloud" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 3
+motion_scale = Vector2(0.3, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/cloud"]
+texture_filter = 1
+texture = ExtResource("6_62b6n")
+centered = false
+
+[node name="mountain2" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 4
+motion_scale = Vector2(0.4, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/mountain2"]
+texture_filter = 1
+texture = ExtResource("7_rs4xw")
+centered = false
+
+[node name="mountain3" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 2
+motion_scale = Vector2(0.5, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/mountain3"]
+texture_filter = 1
+texture = ExtResource("8_lk57d")
+centered = false
+
+[node name="cloud 2" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = 1
+motion_scale = Vector2(0.6, 1)
+motion_mirroring = Vector2(640, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/cloud 2"]
+texture_filter = 1
+texture = ExtResource("9_2hkqn")
+centered = false
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+z_index = 99
+position = Vector2(1, 0)
+tile_map_data = PackedByteArray("AAAOAA0ABAAAAAAAAAAPAA0ABAAAAAAAAAAQAA0ABAAAAAAAAAARAA0ABAAAAAAAAAASAA0ABAAAAAAAAAATAA0ABAAAAAAAAAANAA0ABAAAAAAAAAAMAA0ABAAAAAAAAAALAA0ABAAAAAAAAAAKAA0ABAAAAAAAAAAVAAwABAAAAAAAAAAWAAwABAABAAEAAAAXAAwABAACAAIAAAAYAAwABAAAAAAAAAAZAAwABAACAAIAAAAaAAwABAABAAEAAAATAAsABAAAAAAAAAAUAAsABAABAAEAAAASAAgABAACAAIAAAATAAgABAACAAIAAAAUAAgABAAAAAAAAAAPAAoABAAAAAAAAAAQAAoABAAAAAAAAAANAAcABAACAAIAAAAOAAcABAABAAEAAAAPAAcABAABAAEAAAAMAAQABAACAAIAAAANAAQABAACAAIAAAAOAAQABAABAAEAAAAPAAQABAACAAIAAAATAAQABAAAAAAAAAAUAAQABAACAAIAAAAVAAQABAABAAEAAAATAAYABAACAAIAAAAUAAYABAABAAEAAAAQAAIABAACAAIAAAARAAIABAABAAEAAAAWAAcABAABAAEAAAAXAAcABAACAAIAAAAYAAYABAABAAEAAAAZAAYABAACAAIAAAAaAAUABAABAAEAAAAbAAUABAACAAIAAAAcAAQABAABAAEAAAAdAAQABAABAAEAAAAeAAMABAACAAIAAAAfAAMABAACAAIAAAAQABQABAAAAAAAAAARABQABAAAAAAAAAASABQABAABAAEAAAATABQABAACAAIAAAAUABQABAABAAEAAAAVABQABAAAAAAAAAAWABQABAACAAIAAAAXABQABAACAAIAAAAYABQABAAAAAAAAAAZABQABAACAAIAAAAaABQABAACAAIAAAAbABQABAAAAAAAAAAQABMABAAAAAAAAAAQABIABAAAAAAAAAAQABEABAAAAAAAAAAQABAABAABAAEAAAAQAA8ABAACAAIAAAATABEABAACAAIAAAAUABAABAACAAIAAAAUABEABAABAAEAAAATABAABAACAAIAAAAUABMABAACAAIAAAAUABIABAACAAIAAAATABIABAAAAAAAAAATABMABAACAAIAAAAVAA4ABAAAAAAAAAAWAA8ABAABAAEAAAAXABAABAACAAIAAAAYABEABAAAAAAAAAAZABIABAABAAEAAAAaABMABAACAAIAAAAcABUABAAAAAAAAAAdABYABAABAAEAAAAeABcABAACAAIAAAAkABUABAAAAAAAAAAlABYABAABAAEAAAAmABcABAACAAIAAAAqAA8ABAAAAAAAAAArABAABAABAAEAAAAsABEABAACAAIAAAAvAAoABAAAAAAAAAAwAAsABAABAAEAAAAxAAwABAACAAIAAAA0AAAABAAAAAAAAAA1AAEABAABAAEAAAA2AAIABAACAAIAAAA=")
+tile_set = SubResource("TileSet_2hkqn")

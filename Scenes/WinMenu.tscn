@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://bdltsxbh84nou" path="res://Scripts/finish.gd" id="1_rnswt"]
 [ext_resource type="FontFile" uid="uid://bi01jm3c5v1kq" path="res://Sprites/Themes/poco/Poco.ttf" id="2_rnswt"]
 [ext_resource type="Texture2D" uid="uid://b3t2r3qwlpiwr" path="res://Sprites/Particles/yupi.png" id="3_fu86e"]
-[ext_resource type="Theme" uid="uid://b622x4jxrgbcd" path="res://Sprites/Themes/Chic.tres" id="5_fu86e"]
+[ext_resource type="Theme" uid="uid://dutxnmu6yygl6" path="res://Sprites/Themes/Chic.tres" id="5_fu86e"]
 
 [sub_resource type="Gradient" id="Gradient_ufayh"]
 offsets = PackedFloat32Array(0, 0.508197, 1)
@@ -73,6 +73,7 @@ theme = ExtResource("1_0cgja")
 theme_override_styles/panel = SubResource("StyleBoxTexture_0qixp")
 
 [node name="YouWin" type="Label" parent="."]
+layout_mode = 0
 offset_left = 106.0
 offset_top = 12.0
 offset_right = 295.0
@@ -86,6 +87,7 @@ label_settings = SubResource("LabelSettings_5paj2")
 horizontal_alignment = 1
 
 [node name="ScoreLabel" type="Label" parent="."]
+layout_mode = 0
 offset_left = -83.0
 offset_top = 77.0
 offset_right = 504.0
