@@ -543,8 +543,6 @@ can_dash = true
 dash_force = 1000.0
 dash_duration = 0.1
 clone_scene = ExtResource("2_jhyir")
-chain_segment_count = 2
-chain_segment_length = 2.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false

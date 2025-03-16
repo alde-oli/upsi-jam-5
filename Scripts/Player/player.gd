@@ -25,11 +25,8 @@ class_name Player
 @export var clone_scene: PackedScene
 @export var clone_drag_force: float = 200.0
 @export var fusion_speed: float = 1500.0
-@export var chain_segment_count: int = 10
-@export var chain_segment_length: float = 10.0
 # Au début de la classe Player avec les autres variables membres
 var clone = null
-var chain = null  # Référence à la chaîne physique
 var is_clone_active = false
 var is_being_dragged = false
 var is_dragging_clone = false
@@ -48,8 +45,6 @@ var input_direction: float = 0.0
 var facing_direction: float = 1.0  # 1 pour droite, -1 pour gauche
 
 # Variables pour la mécanique de clone
-var chain_points = []
-var chain_bodies = []
 
 func _ready():
 	# Initialiser les managers et la state machine
@@ -57,15 +52,6 @@ func _ready():
 	input_manager.init(self)
 	anim_manager.init(self)
 	state_machine.init(self, input_manager, anim_manager)
-	
-	# Initialiser la chaîne
-	initialize_chain()
-
-func initialize_chain():
-	# Crée une chaîne physique entre le joueur et le clone
-	chain_points = []
-	for i in range(chain_segment_count + 1):
-		chain_points.append(global_position)
 
 func update_life_ui():
 	$Label.text = "life: " + str(life)
@@ -105,26 +91,6 @@ func _physics_process(delta):
 	# Gérer les entrées pour la mécanique de clone
 	process_clone_inputs()
 	
-	# Mettre à jour la position de la chaîne
-	update_chain()
-	
-	# Gérer la fusion si active
-	if is_fusing:
-		fusion_timer += delta
-		var direction = (target_position - global_position).normalized()
-		velocity = direction * fusion_speed
-		
-		# Vérifier si nous sommes arrivés à destination ou si timeout
-		if global_position.distance_to(target_position) < fusion_snap_distance || fusion_timer > fusion_max_time:
-			# Snap directement à la position cible pour éviter les blocages
-			global_position = target_position
-			complete_fusion()
-	
-	# Gérer le drag par le clone
-	if is_being_dragged && is_clone_active:
-		var direction = (clone.global_position - global_position).normalized()
-		velocity = direction * clone_drag_force
-	
 	# Processus de la state machine
 	state_machine.process(delta)
 	
@@ -141,17 +107,6 @@ func process_clone_inputs():
 			start_drag_clone()
 		elif input_manager.is_player_drag_released() && is_dragging_clone:
 			stop_drag_clone()
-			
-		if input_manager.is_clone_drag_pressed() && !is_dragging_clone && !is_being_dragged:
-			start_being_dragged()
-		elif input_manager.is_clone_drag_released() && is_being_dragged:
-			stop_being_dragged()
-			
-		if input_manager.is_player_fusion_pressed():
-			start_fusion(true)
-		
-		if input_manager.is_clone_fusion_pressed():
-			start_fusion(false)
 
 func spawn_clone():
 	# Créer une instance du clone
@@ -181,16 +136,6 @@ func spawn_clone():
 	clone.velocity = final_velocity          # Définir la vitesse directement
 	clone.activate(global_position, final_velocity.normalized(), self)
 	is_clone_active = true
-	
-	# Créer la chaîne physique
-	var chain = load("res://Scenes/Player/chain/PhysicalChain.tscn").instantiate()
-	get_parent().add_child(chain)
-	chain.start_node_path = get_path()
-	chain.end_node_path = clone.get_path()
-	chain.name = "PlayerCloneChain"
-	
-	# Stocker une référence à la chaîne
-	self.chain = chain
 
 func start_drag_clone():
 	is_dragging_clone = true
@@ -239,42 +184,10 @@ func complete_fusion():
 	if clone:
 		clone.deactivate()
 	
-	# Détruire la chaîne
-	var chain_node = get_parent().get_node_or_null("PlayerCloneChain")
-	if chain_node:
-		chain_node.destroy()
-	
 	is_clone_active = false
 
-func update_chain():
-	if !is_clone_active || !clone:
-		return
-		
-	# Mettre à jour les points de la chaîne pour la simulation
-	var start_pos = global_position
-	var end_pos = clone.global_position
-	
-	# Calculer la distance entre le joueur et le clone
-	var distance = start_pos.distance_to(end_pos)
-	
-	# Si la distance dépasse la longueur maximale de la chaîne, ramener le clone
-	if distance > max_chain_length:
-		var direction = (start_pos - end_pos).normalized()
-		clone.velocity += direction * 100.0 * (distance - max_chain_length) / 100.0
-	
-	# Mettre à jour les points de la chaîne
-	var segment_vector = (end_pos - start_pos) / chain_segment_count
-	
-	for i in range(chain_segment_count + 1):
-		chain_points[i] = start_pos + segment_vector * i
-
-
 func _draw():
-	# Dessiner la chaîne si le clone est actif
-	if is_clone_active && chain_points.size() > 1:
-		for i in range(chain_points.size() - 1):
-			draw_line(to_local(chain_points[i]), to_local(chain_points[i+1]), Color(0.8, 0.8, 0.8), 3.0)
-
+	pass
 func _process(_delta):
 	# Forcer le rafraîchissement du dessin pour la chaîne
 	queue_redraw()
