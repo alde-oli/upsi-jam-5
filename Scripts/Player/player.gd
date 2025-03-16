@@ -8,12 +8,12 @@ class_name Player
 @onready var animated_sprite_b = $AnimatedSprite2D_Black
 
 # Variables exportées pour les réglages dans l'éditeur
-@export var max_speed: float = 1000.0
+@export var max_speed: float = 900.0
 @export var acceleration: float = 1000.0
 @export var deceleration: float = 1500.0
 
 @export var gravity: int = 980
-@export var jump_force: int = 500
+@export var jump_force: int = 400
 @export var max_jump_count: int = 1
 
 @export var can_wall_jump: bool = false
@@ -49,8 +49,8 @@ var facing_direction: float = 1.0  # 1 pour droite, -1 pour gauche
 # Variables pour la mécanique de clone
 
 func _ready():
-	# Initialiser les managers et la state machine
-
+	# Initialiser les managers et la state smachine
+	update_life_ui()
 	input_manager.init(self)
 	anim_manager.init(self)
 	state_machine.init(self, input_manager, anim_manager)
@@ -174,13 +174,13 @@ func process_grapple_physics(delta):
 	
 func _physics_process(delta):
 	if is_clone_active:
-		scale = Vector2(0.4, 0.4)
+		scale = Vector2(0.8, 0.8)
 		animated_sprite_b.visible = true
 		animated_sprite_bw.visible = false
 		process_grapple_physics(delta)
 		#$Sprite2D.texture = active_sprite
 	else:
-		scale = Vector2(0.7, 0.7)
+		scale = Vector2(1, 1)
 		animated_sprite_b.visible = false
 		animated_sprite_bw.visible = true
 		#$Sprite2D.texture = inactive_sprite

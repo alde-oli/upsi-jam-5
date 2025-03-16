@@ -269,11 +269,11 @@ height = 26.0
 radius = 17.1172
 
 [node name="Clone" type="CharacterBody2D"]
-scale = Vector2(0.4, 0.4)
+scale = Vector2(0.8, 0.8)
 collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_ygbde")
-gravity = 10
+gravity = 0
 drag_force = 500.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -293,3 +293,23 @@ script = ExtResource("5_67gig")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2(-1.42857, 5.71429)
 shape = SubResource("CircleShape2D_ygbde")
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+show_behind_parent = true
+position = Vector2(1.25, 5)
+amount = 50
+lifetime = 0.73
+speed_scale = 1.89
+explosiveness = 0.29
+randomness = 0.54
+lifetime_randomness = 0.14
+emission_shape = 1
+emission_sphere_radius = 21.45
+particle_flag_align_y = true
+spread = 101.25
+gravity = Vector2(0, 0)
+angular_velocity_min = 1.0
+angular_velocity_max = 1.0
+radial_accel_min = 6.0
+radial_accel_max = 6.0
+color = Color(0, 0, 0, 1)
