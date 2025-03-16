@@ -25,6 +25,10 @@ func update_animation(state_name: String):
 			play("dash")  # Il faudra peut-être créer cette animation
 		"wall_slide":
 			play("wall_slide")  # Il faudra peut-être créer cette animation
+		"split":
+			play("split")  # Nouvelle animation pour le split
+		"fusion":
+			play("fusion")  # Nouvelle animation pour la fusion
 		_:
 			print("État inconnu pour l'animation: ", state_name)
 

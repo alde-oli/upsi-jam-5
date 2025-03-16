@@ -16,6 +16,9 @@ const JUMP = "jump"
 const FALL = "fall"
 const DASH = "dash"
 const WALL_SLIDE = "wall_slide"
+# Nouveaux états pour la mécanique de clone
+const SPLIT = "split"
+const FUSION = "fusion"
 
 
 func init(p: Player, im: InputManager, am: AnimManager):
@@ -35,6 +38,10 @@ func init(p: Player, im: InputManager, am: AnimManager):
 	if player.can_wall_jump:
 		states[WALL_SLIDE] = preload("res://Scripts/Player/states/wall_slide.gd").new()
 	
+	# Ajouter les nouveaux états pour la mécanique de clone
+	states[SPLIT] = preload("res://Scripts/Player/states/split.gd").new()
+	states[FUSION] = preload("res://Scripts/Player/states/fusion.gd").new()
+	
 	# Initialiser chaque état
 	for state in states.values():
 		state.init(player, self, input_manager, anim_manager)
@@ -46,6 +53,22 @@ func init(p: Player, im: InputManager, am: AnimManager):
 func process(delta):
 	if current_state != null:
 		current_state.process(delta)
+		
+		# Vérifier les transitions d'état liées au clone
+		if current_state != states[SPLIT] && current_state != states[FUSION]:
+			check_clone_state_transitions()
+
+
+func check_clone_state_transitions():
+	# Vérifier si nous devons passer à l'état SPLIT
+	if input_manager.is_split_pressed() && !player.is_clone_active:
+		change_state(SPLIT)
+		return
+	
+	# Vérifier si nous devons passer à l'état FUSION
+	if player.is_fusing:
+		change_state(FUSION)
+		return
 
 
 func change_state(new_state_name):

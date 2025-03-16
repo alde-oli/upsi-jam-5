@@ -67,11 +67,25 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm -rf templates templates.tpz
+      
+      # New step: Reset UIDs and force reimport
+      - name: Reset UIDs and Reimport Assets
+        run: |
+          # Remove the UID cache to force regeneration
+          rm -rf .godot/uid_cache.bin .godot/imported/
+          # Create empty cache structure to ensure proper initialization
+          mkdir -p .godot
+          echo '{"version": 2, "uid_cache": {}}' > .godot/uid_cache.bin
+          # Force resource reimport
+          godot --headless --editor --quit
+          # Ensure the editor has time to complete the reimport
+          sleep 10
 
       - name: Web Build
         id: web_build
         run: |
           mkdir -p build/web
+          # Make sure the export preset uses paths instead of UIDs
           godot --headless --export-release "Web" ./build/web/index.html || {
             echo "::set-output name=build_failed::true"
             exit 1
