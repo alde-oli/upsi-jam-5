@@ -12,12 +12,12 @@
 offsets = PackedFloat32Array(0, 0.508197, 1)
 colors = PackedColorArray(0.547496, 0.0703442, 0.412671, 1, 0.721569, 0.431373, 0.603922, 1, 0.795312, 0.630347, 0.97464, 1)
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_0u5us"]
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_0677l"]
 gradient = SubResource("Gradient_hnfy4")
 fill_from = Vector2(0, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xj6ph"]
-texture = SubResource("GradientTexture2D_0u5us")
+texture = SubResource("GradientTexture2D_0677l")
 modulate_color = Color(0.735286, 0.832472, 0.98979, 1)
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_clofc"]
@@ -74,12 +74,14 @@ process_material = SubResource("ParticleProcessMaterial_clofc")
 
 [node name="NoButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 198.0
-offset_top = 122.0
-offset_right = 266.0
-offset_bottom = 179.0
+offset_left = 208.0
+offset_top = 121.0
+offset_right = 276.0
+offset_bottom = 178.0
 focus_neighbor_left = NodePath("../YesButton")
+focus_neighbor_top = NodePath("../YesButton")
 focus_neighbor_right = NodePath("../YesButton")
+focus_neighbor_bottom = NodePath("../YesButton")
 focus_next = NodePath("../YesButton")
 focus_previous = NodePath("../YesButton")
 theme = ExtResource("2_184ew")
@@ -99,12 +101,14 @@ offset_bottom = 49.0
 
 [node name="YesButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 115.0
-offset_top = 128.0
-offset_right = 188.0
-offset_bottom = 172.0
+offset_left = 119.0
+offset_top = 127.0
+offset_right = 192.0
+offset_bottom = 171.0
 focus_neighbor_left = NodePath("../NoButton")
+focus_neighbor_top = NodePath("../NoButton")
 focus_neighbor_right = NodePath("../NoButton")
+focus_neighbor_bottom = NodePath("../NoButton")
 focus_next = NodePath("../NoButton")
 focus_previous = NodePath("../NoButton")
 theme = ExtResource("2_184ew")
@@ -123,7 +127,7 @@ offset_top = 40.0
 offset_right = 67.0
 offset_bottom = 43.0
 
-[node name="Label2" type="Label" parent="."]
+[node name="GameOverLabel" type="Label" parent="."]
 modulate = Color(0.893064, 0.673025, 0.7678, 1)
 layout_mode = 0
 offset_left = -112.0
@@ -136,7 +140,7 @@ text = "GAME OVER"
 label_settings = SubResource("LabelSettings_evg8o")
 horizontal_alignment = 1
 
-[node name="Label3" type="Label" parent="."]
+[node name="PlayAgainLabel" type="Label" parent="."]
 modulate = Color(0.974462, 0.840731, 0.891762, 1)
 layout_mode = 0
 offset_left = -23.0

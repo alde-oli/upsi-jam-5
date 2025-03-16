@@ -2,8 +2,8 @@ extends Label
 
 var counter = 0;
 @onready var base_pos = Vector2(0,0)
-var len = 5
-var speed = 1
+@export var len = 2
+@export var speed: float = 1
 
 func _ready() -> void:
 	base_pos = global_position
