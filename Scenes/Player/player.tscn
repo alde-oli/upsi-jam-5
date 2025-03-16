@@ -1,16 +1,16 @@
-[gd_scene load_steps=48 format=3 uid="uid://cmna7jwwrc4a2"]
+[gd_scene load_steps=50 format=3 uid="uid://cmna7jwwrc4a2"]
 
 [ext_resource type="Script" uid="uid://oo73w74x83o1" path="res://Scripts/Player/player.gd" id="1_vajw0"]
 [ext_resource type="PackedScene" uid="uid://cjtitsr8o7bix" path="res://Scenes/Player/Clone.tscn" id="2_jhyir"]
 [ext_resource type="Script" uid="uid://bfly8dd4o27wp" path="res://Scripts/Player/anim_manager.gd" id="3_yag5l"]
 [ext_resource type="Script" uid="uid://g5fub88q04am" path="res://Scripts/Player/input_manager.gd" id="4_j2l22"]
-
-[ext_resource type="Texture2D" uid="uid://lcg2rvpr7a56" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://dsk6io3m1otyl" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
+[ext_resource type="Texture2D" uid="uid://dq8bbbjoql1j0" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://ddlqdeusjxslh" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
 [ext_resource type="Script" uid="uid://cayeealv3lvww" path="res://Scripts/Player/state_machine.gd" id="5_t7wdw"]
-[ext_resource type="Texture2D" uid="uid://g6t331m05vme" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://c3uwowh4j2l6r" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
-[ext_resource type="Texture2D" uid="uid://ct8rf44l4k8sd" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
+[ext_resource type="Texture2D" uid="uid://bytib52qdpun5" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://cq1p8olbycfc0" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
+[ext_resource type="Texture2D" uid="uid://d164jamvpicle" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
+[ext_resource type="Script" uid="uid://cbbo2dqeisuq1" path="res://Scenes/Player/area_clone_colision_with_player.gd" id="11_74mp2"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_u7k3r"]
 radius = 6.0
@@ -294,7 +294,11 @@ initial_velocity_min = 15.0
 initial_velocity_max = 109.99
 gravity = Vector3(0, 98, 0)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_jhyir"]
+radius = 17.1172
+
 [node name="Player" type="CharacterBody2D"]
+collision_layer = 0
 script = ExtResource("1_vajw0")
 max_speed = 600.0
 jump_force = 400
@@ -334,3 +338,12 @@ trail_lifetime = 0.2
 trail_sections = 5
 trail_section_subdivisions = 1
 process_material = SubResource("ParticleProcessMaterial_jlvik")
+
+[node name="AreaCloneColisionWithPlayer" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("11_74mp2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AreaCloneColisionWithPlayer"]
+position = Vector2(0, 6)
+shape = SubResource("CircleShape2D_jhyir")

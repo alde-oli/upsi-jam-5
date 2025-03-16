@@ -6,7 +6,7 @@ signal fusion_requested(is_player_fusion: bool)
 @export var max_speed: float = 800.0
 @export var deceleration: float = 1000.0
 @export var gravity: int = 980
-@export var drag_force: float = 1200.0
+@export var drag_force: float = 200.0
 @export var fusion_speed: float = 1500.0
 @export var fusion_snap_distance: float = 25.0  # Distance à laquelle on "snap" automatiquement
 

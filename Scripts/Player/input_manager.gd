@@ -10,7 +10,7 @@ func init(p: Player):
 
 func get_movement_direction() -> float:
 	# Renvoie la direction du mouvement (-1, 0 ou 1)
-	return Input.get_axis("ui_left", "ui_right")
+	return Input.get_axis("input_left", "input_right")
 
 
 func is_jump_pressed() -> bool:

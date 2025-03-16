@@ -31,7 +31,8 @@ func process(delta):
 		return
 	
 	# Dans l'état idle, on s'assure que la vitesse horizontale est à 0
-	player.velocity.x = 0
+	if not player.is_being_dragged:
+		player.velocity.x = 0
 
 
 func on_exit():

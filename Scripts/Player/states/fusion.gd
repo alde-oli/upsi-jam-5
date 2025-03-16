@@ -18,7 +18,7 @@ func process(delta):
 		if player.is_on_floor():
 			state_machine.change_state(state_machine.IDLE)
 		else:
-			state_machine.change_state(state_machine.FALL)
+			state_machine.change_state(state_machine.JUMP)
 
 func on_exit():
 	# Nettoyer si nécessaire

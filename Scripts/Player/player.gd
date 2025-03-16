@@ -22,7 +22,7 @@ class_name Player
 
 # Nouvelles variables pour la mécanique de clone
 @export var clone_scene: PackedScene
-@export var clone_drag_force: float = 1200.0
+@export var clone_drag_force: float = 200.0
 @export var fusion_speed: float = 1500.0
 @export var chain_segment_count: int = 10
 @export var chain_segment_length: float = 10.0
@@ -248,13 +248,14 @@ func update_chain():
 	# Si la distance dépasse la longueur maximale de la chaîne, ramener le clone
 	if distance > max_chain_length:
 		var direction = (start_pos - end_pos).normalized()
-		clone.velocity += direction * 1000.0 * (distance - max_chain_length) / 100.0
+		clone.velocity += direction * 100.0 * (distance - max_chain_length) / 100.0
 	
 	# Mettre à jour les points de la chaîne
 	var segment_vector = (end_pos - start_pos) / chain_segment_count
 	
 	for i in range(chain_segment_count + 1):
 		chain_points[i] = start_pos + segment_vector * i
+
 
 func _draw():
 	# Dessiner la chaîne si le clone est actif
