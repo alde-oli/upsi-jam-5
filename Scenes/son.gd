@@ -91,7 +91,7 @@ func play_sfx(state_name: String):
 		"fusion":
 			pass
 			
-		"death":
+		"death": 
 			rand_val = randi() % 3
 			match rand_val:
 				0:
