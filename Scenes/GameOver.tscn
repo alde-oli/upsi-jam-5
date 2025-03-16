@@ -1,12 +1,12 @@
 [gd_scene load_steps=16 format=3 uid="uid://cx5ur4di4l5at"]
 
-[ext_resource type="Script" uid="uid://dwke1pq6k3qvp" path="res://Scripts/game_over.gd" id="1_0u5us"]
-[ext_resource type="Script" uid="uid://cj36nau0ud63c" path="res://Scripts/Button/yes_button.gd" id="1_qomsq"]
-[ext_resource type="Script" uid="uid://brhhsoussfjqr" path="res://Scripts/Button/no_button.gd" id="2_0u5us"]
-[ext_resource type="Theme" uid="uid://bxa4pwb1xlx1s" path="res://Sprites/Themes/Menu.tres" id="2_184ew"]
-[ext_resource type="Texture2D" uid="uid://b3t2r3qwlpiwr" path="res://Sprites/Particles/yupi.png" id="3_0677l"]
-[ext_resource type="FontFile" uid="uid://bi01jm3c5v1kq" path="res://Sprites/Themes/poco/Poco.ttf" id="3_wbd1e"]
-[ext_resource type="Script" uid="uid://ct8ymk6k3y1pk" path="res://Scripts/Button/wibblewobble.gd" id="7_0677l"]
+[ext_resource type="Script" uid="uid://dh2iao4sjp4ff" path="res://Scripts/game_over.gd" id="1_5mu6e"]
+[ext_resource type="Theme" uid="uid://bxa4pwb1xlx1s" path="res://Sprites/Themes/Menu.tres" id="2_8710x"]
+[ext_resource type="Texture2D" uid="uid://b3t2r3qwlpiwr" path="res://Sprites/Particles/yupi.png" id="3_a14ly"]
+[ext_resource type="FontFile" uid="uid://bi01jm3c5v1kq" path="res://Sprites/Themes/poco/Poco.ttf" id="4_tr7xh"]
+[ext_resource type="Script" uid="uid://cj36nau0ud63c" path="res://Scripts/Button/yes_button.gd" id="5_w0gmt"]
+[ext_resource type="Script" uid="uid://brhhsoussfjqr" path="res://Scripts/Button/no_button.gd" id="6_6wu1n"]
+[ext_resource type="Script" uid="uid://ct8ymk6k3y1pk" path="res://Scripts/Button/wibblewobble.gd" id="7_aa261"]
 
 [sub_resource type="Gradient" id="Gradient_hnfy4"]
 offsets = PackedFloat32Array(0, 0.508197, 1)
@@ -52,7 +52,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_0u5us")
+script = ExtResource("1_5mu6e")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -61,13 +61,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_184ew")
+theme = ExtResource("2_8710x")
 theme_override_styles/panel = SubResource("StyleBoxTexture_xj6ph")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="."]
 position = Vector2(201, -35)
 amount = 43
-texture = ExtResource("3_0677l")
+texture = ExtResource("3_a14ly")
 lifetime = 3.74
 preprocess = 6.28
 process_material = SubResource("ParticleProcessMaterial_clofc")
@@ -84,13 +84,13 @@ focus_neighbor_right = NodePath("../YesButton")
 focus_neighbor_bottom = NodePath("../YesButton")
 focus_next = NodePath("../YesButton")
 focus_previous = NodePath("../YesButton")
-theme = ExtResource("2_184ew")
-theme_override_fonts/font = ExtResource("3_wbd1e")
+theme = ExtResource("2_8710x")
+theme_override_fonts/font = ExtResource("4_tr7xh")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/focus = SubResource("StyleBoxEmpty_evg8o")
 text = "NO"
 flat = true
-script = ExtResource("1_qomsq")
+script = ExtResource("5_w0gmt")
 
 [node name="ColorRect_No" type="ColorRect" parent="NoButton"]
 layout_mode = 0
@@ -111,14 +111,14 @@ focus_neighbor_right = NodePath("../NoButton")
 focus_neighbor_bottom = NodePath("../NoButton")
 focus_next = NodePath("../NoButton")
 focus_previous = NodePath("../NoButton")
-theme = ExtResource("2_184ew")
-theme_override_fonts/font = ExtResource("3_wbd1e")
+theme = ExtResource("2_8710x")
+theme_override_fonts/font = ExtResource("4_tr7xh")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/focus = SubResource("StyleBoxEmpty_0u5us")
 text = "YES"
 flat = true
 alignment = 0
-script = ExtResource("2_0u5us")
+script = ExtResource("6_6wu1n")
 
 [node name="ColorRect_Yes" type="ColorRect" parent="YesButton"]
 layout_mode = 0
@@ -135,7 +135,7 @@ offset_top = 13.0
 offset_right = 346.0
 offset_bottom = 61.0
 scale = Vector2(1.36, 1.36)
-theme_override_fonts/font = ExtResource("3_wbd1e")
+theme_override_fonts/font = ExtResource("4_tr7xh")
 text = "GAME OVER"
 label_settings = SubResource("LabelSettings_evg8o")
 horizontal_alignment = 1
@@ -147,11 +147,11 @@ offset_left = -23.0
 offset_top = 83.0
 offset_right = 435.0
 offset_bottom = 107.0
-theme_override_fonts/font = ExtResource("3_wbd1e")
+theme_override_fonts/font = ExtResource("4_tr7xh")
 text = "PLAY AGAIN ?"
 label_settings = SubResource("LabelSettings_184ew")
 horizontal_alignment = 1
-script = ExtResource("7_0677l")
+script = ExtResource("7_aa261")
 
 [connection signal="focus_entered" from="NoButton" to="NoButton" method="_on_focus_entered"]
 [connection signal="focus_exited" from="NoButton" to="NoButton" method="_on_focus_exited"]

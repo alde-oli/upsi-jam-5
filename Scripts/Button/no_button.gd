@@ -1,6 +1,6 @@
 extends Button
 
-@onready var selection_bar = $ColorRect_Yes # Récupère le trait sous le bouton
+@onready var selection_bar = $ColorRect_Yes
 
 func _ready():
 	selection_bar.visible = false  # Cache le trait au départ
