@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://swjdyom2qqlm"]
+[gd_scene load_steps=0 format=3 uid="uid://swjdyom2qqlm"]
 
 [node name="OptionsMenu" type="Control"]
 layout_mode = 3
