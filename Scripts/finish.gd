@@ -17,4 +17,5 @@ func _on_menu_button_pressed() -> void:
 	get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
 
 func _on_next_button_pressed() -> void:
-	get_tree().change_scene_to_file("res://Levels/level_" + str(GameData.current_level+1) + ".tscn")
+	GameData.current_level += 1
+	get_tree().change_scene_to_file("res://Levels/level_" + str(GameData.current_level) + ".tscn")
