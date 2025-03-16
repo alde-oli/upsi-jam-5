@@ -86,12 +86,42 @@ func process_grapple_physics(delta):
 	var is_player_below = player_pos.y > clone_pos.y
 	
 	# Skip if player is above the clone
-	if !is_player_below:
+	if !is_player_below and !is_chain_constraint_disabled:
 		return
 		
-	# Apply gravity to clone
-	clone.velocity.y += gravity * delta * 0.5  # Reduced gravity factor for slower fall
-	clone.global_position += clone.velocity * delta
+	# Handle clone movement based on constraint state
+	if is_chain_constraint_disabled:
+		# When constraint is disabled, make clone chase the player
+		var to_player = player_pos - clone_pos
+		var chase_direction = to_player.normalized()
+		
+		# Set high speed for chasing
+		var chase_speed = 800  # Fast chase speed, adjust as needed
+		
+		# Move clone toward player quickly
+		clone.velocity = chase_direction * chase_speed
+		
+		# Disable collision for clone during chase
+		if clone.has_method("set_collision_disabled"):
+			clone.set_collision_disabled(true)
+		# Alternative if no method exists:
+		# clone.set_collision_layer_value(1, false)
+		# clone.set_collision_mask_value(1, false)
+		
+		# Update clone position
+		clone.global_position += clone.velocity * delta
+	else:
+		# Normal clone behavior when constraint is active
+		# Apply gravity to clone
+		clone.velocity.y += gravity * delta * 0.5  # Reduced gravity factor for slower fall
+		clone.global_position += clone.velocity * delta
+		
+		# Re-enable collision if needed
+		if clone.has_method("set_collision_disabled"):
+			clone.set_collision_disabled(false)
+		# Alternative if no method exists:
+		# clone.set_collision_layer_value(1, true)
+		# clone.set_collision_mask_value(1, true)
 	
 	var direction = to_clone.normalized()
 	
