@@ -4,13 +4,13 @@
 [ext_resource type="PackedScene" uid="uid://cjtitsr8o7bix" path="res://Scenes/Player/Clone.tscn" id="2_jhyir"]
 [ext_resource type="Script" uid="uid://bfly8dd4o27wp" path="res://Scripts/Player/anim_manager.gd" id="3_yag5l"]
 [ext_resource type="Script" uid="uid://g5fub88q04am" path="res://Scripts/Player/input_manager.gd" id="4_j2l22"]
-[ext_resource type="Texture2D" uid="uid://dq8bbbjoql1j0" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
-[ext_resource type="Texture2D" uid="uid://ddlqdeusjxslh" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
+[ext_resource type="Texture2D" uid="uid://b0gkj2ha8ew1y" path="res://Sprites/Player/Black/Black Player dash.png" id="5_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://eibac833hj6" path="res://Sprites/Player/BlackandWhite/BlackandWhite player idle 48x48.png" id="5_jlvik"]
 [ext_resource type="Script" uid="uid://cayeealv3lvww" path="res://Scripts/Player/state_machine.gd" id="5_t7wdw"]
-[ext_resource type="Texture2D" uid="uid://bytib52qdpun5" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
 [ext_resource type="Texture2D" uid="uid://2l8w06oksxg2" path="res://Sprites/Player/Black/Black player idle 48x48.png" id="7_74mp2"]
-[ext_resource type="Texture2D" uid="uid://cq1p8olbycfc0" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
-[ext_resource type="Texture2D" uid="uid://d164jamvpicle" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
+[ext_resource type="Texture2D" uid="uid://dy683qgq3pudl" path="res://Sprites/Player/BlackandWhite/BlackandWhite player jump 48x48.png" id="6_gk6dx"]
+[ext_resource type="Texture2D" uid="uid://cs7npf02j5cae" path="res://Sprites/Player/BlackandWhite/BlackandWhite player run 48x48.png" id="7_jhyir"]
+[ext_resource type="Texture2D" uid="uid://c67wh1u57hr6c" path="res://Sprites/Player/BlackandWhite/BlackandWhite player wall slide 48x48.png" id="8_74mp2"]
 [ext_resource type="Script" uid="uid://cbbo2dqeisuq1" path="res://Scenes/Player/area_clone_colision_with_player.gd" id="11_74mp2"]
 [ext_resource type="Texture2D" uid="uid://bidwrj65c7maf" path="res://Sprites/Player/Black/Black player jump 48x48.png" id="12_dey5f"]
 [ext_resource type="Texture2D" uid="uid://4t4u3hhw68k6" path="res://Sprites/Player/Black/Black player run 48x48.png" id="13_r5xpd"]
@@ -532,7 +532,8 @@ animations = [{
 radius = 17.1172
 
 [node name="Player" type="CharacterBody2D"]
-collision_layer = 0
+collision_layer = 4
+collision_mask = 5
 script = ExtResource("1_vajw0")
 max_speed = 600.0
 jump_force = 400
@@ -589,8 +590,8 @@ trail_section_subdivisions = 1
 process_material = SubResource("ParticleProcessMaterial_jlvik")
 
 [node name="AreaCloneColisionWithPlayer" type="Area2D" parent="."]
-collision_layer = 2
-collision_mask = 2
+collision_layer = 6
+collision_mask = 6
 script = ExtResource("11_74mp2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AreaCloneColisionWithPlayer"]

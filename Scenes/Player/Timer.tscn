@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://ceanj73jvlemk"]
+[gd_scene load_steps=3 format=3 uid="uid://ceanj73jvlemk"]
 
 [ext_resource type="Script" uid="uid://cfwtxds8mcwfy" path="res://Scripts/timer.gd" id="1_hytk1"]
+[ext_resource type="Texture2D" uid="uid://ddt7f3cgygfmr" path="res://Sprites/UI/chrono.png" id="2_s121c"]
 
 [node name="Timer" type="Node2D"]
 script = ExtResource("1_hytk1")
@@ -15,3 +16,8 @@ horizontal_alignment = 2
 vertical_alignment = 2
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(326, 10)
+scale = Vector2(0.4375, 0.4375)
+texture = ExtResource("2_s121c")
