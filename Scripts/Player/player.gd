@@ -193,25 +193,6 @@ func stop_being_dragged():
 	if clone:
 		clone.stop_player_drag()
 
-func start_fusion(is_player_fusion: bool):
-	is_fusing = true
-	if is_player_fusion:
-		# Le joueur veut ramener le clone à lui
-		if clone:
-			clone.start_fusion(true)
-	else:
-		# Le clone veut ramener le joueur à lui
-		target_position = clone.global_position
-
-func _on_clone_fusion_requested(is_player_fusion: bool):
-	if is_player_fusion:
-		# Le clone nous informe qu'il veut nous fusionner
-		target_position = clone.global_position
-		is_fusing = true
-	else:
-		# La fusion au clone est terminée
-		complete_fusion()
-
 func complete_fusion():
 	is_fusing = false
 	is_being_dragged = false
@@ -222,12 +203,8 @@ func complete_fusion():
 	
 	is_clone_active = false
 
-func _draw():
+func _process(_delta):
 	pass
-func process(_delta):
-	draw_chain_range_indicator()
-	# Forcer le rafraîchissement du dessin pour la chaîne
-	queue_redraw()
 
 func reset_jump():
 	jump_count = 0
