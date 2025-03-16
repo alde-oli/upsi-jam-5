@@ -107,39 +107,7 @@ func process_clone_inputs():
 			start_drag_clone()
 		elif input_manager.is_player_drag_released() && is_dragging_clone:
 			stop_drag_clone()
-func draw_chain_range_indicator():
-	# Make sure we're in a valid state to draw
-	if !is_instance_valid(self) or !is_inside_tree():
-		return
-		
-	# Clear any previous drawing
-	queue_redraw()
-	
-	# Draw a circle with radius of max_chain_length around the player
-	var center = Vector2.ZERO  # Draw relative to local position
-	var radius = max_chain_length
-	var color = Color(0.2, 0.7, 1.0, 0.5)  # Light blue with some transparency
-	var line_width = 2.0
-	var num_points = 32  # Number of points to use for the circle
-	
-	# Draw the circle point by point
-	for i in range(num_points + 1):
-		var angle_from = i * (2.0 * PI / num_points)
-		var angle_to = (i + 1) * (2.0 * PI / num_points)
-		
-		var from_point = center + Vector2(cos(angle_from), sin(angle_from)) * radius
-		var to_point = center + Vector2(cos(angle_to), sin(angle_to)) * radius
-		
-		draw_line(from_point, to_point, color, line_width)
-	
-	# Optionally draw a line to the mouse position if it's within range
-	var mouse_pos = get_local_mouse_position()
-	var mouse_dir = mouse_pos.normalized()
-	var mouse_dist = mouse_pos.length()
-	
-	if mouse_dist > 0:
-		var end_point = mouse_dir * min(mouse_dist, radius)
-		draw_line(center, end_point, Color(1.0, 1.0, 1.0, 0.8), 1.5)
+
 func spawn_clone():
 	# Create clone instance if it doesn't exist
 	if !clone:
@@ -182,16 +150,6 @@ func stop_drag_clone():
 	is_dragging_clone = false
 	if clone:
 		clone.stop_being_dragged()
-
-func start_being_dragged():
-	is_being_dragged = true
-	if clone:
-		clone.start_player_drag()
-
-func stop_being_dragged():
-	is_being_dragged = false
-	if clone:
-		clone.stop_player_drag()
 
 func complete_fusion():
 	is_fusing = false
