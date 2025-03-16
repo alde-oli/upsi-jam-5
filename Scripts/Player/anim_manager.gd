@@ -16,18 +16,25 @@ func update_animation(state_name: String):
 	# Sélectionner l'animation en fonction de l'état
 	match state_name:
 		"idle":
+			Son.play_sfx(state_name)
 			play("idle")
 		"run":
+			Son.play_sfx(state_name)
 			play("run")  # "walk" utilisé dans le script original
 		"jump":
+			Son.play_sfx(state_name)
 			play("jump")
 		"dash":
+			Son.play_sfx(state_name)
 			play("dash")  # Il faudra peut-être créer cette animation
 		"wall_slide":
+			Son.play_sfx(state_name)
 			play("wall_slide")  # Il faudra peut-être créer cette animation
 		"split":
+			Son.play_sfx(state_name)
 			play("split")  # Nouvelle animation pour le split
 		"fusion":
+			Son.play_sfx(state_name)
 			play("fusion")  # Nouvelle animation pour la fusion
 		_:
 			print("État inconnu pour l'animation: ", state_name)
