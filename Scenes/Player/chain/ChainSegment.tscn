@@ -2,11 +2,13 @@
 
 [ext_resource type="Script" uid="uid://bheoq1trdg2kt" path="res://Scenes/Player/chain/chain_segment.gd" id="1_vbb0q"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4yjvh"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vbb0q"]
+radius = 0.75
 
 [node name="ChainSegment" type="RigidBody2D"]
 script = ExtResource("1_vbb0q")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
 scale = Vector2(8, 4)
-shape = SubResource("RectangleShape2D_4yjvh")
+shape = SubResource("CapsuleShape2D_vbb0q")
