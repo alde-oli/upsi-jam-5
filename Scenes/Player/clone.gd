@@ -80,6 +80,10 @@ func _physics_process(delta):
 				velocity.x = 0
 			else:
 				velocity.x -= friction * sign(velocity.x)
+		
+		if is_on_floor():
+			velocity.x = 0
+			velocity.y = 0
 	
 	# Mettre à jour l'animation en fonction de l'état
 	update_animation()
