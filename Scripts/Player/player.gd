@@ -107,34 +107,70 @@ func process_clone_inputs():
 			start_drag_clone()
 		elif input_manager.is_player_drag_released() && is_dragging_clone:
 			stop_drag_clone()
-
+func draw_chain_range_indicator():
+	# Make sure we're in a valid state to draw
+	if !is_instance_valid(self) or !is_inside_tree():
+		return
+		
+	# Clear any previous drawing
+	queue_redraw()
+	
+	# Draw a circle with radius of max_chain_length around the player
+	var center = Vector2.ZERO  # Draw relative to local position
+	var radius = max_chain_length
+	var color = Color(0.2, 0.7, 1.0, 0.5)  # Light blue with some transparency
+	var line_width = 2.0
+	var num_points = 32  # Number of points to use for the circle
+	
+	# Draw the circle point by point
+	for i in range(num_points + 1):
+		var angle_from = i * (2.0 * PI / num_points)
+		var angle_to = (i + 1) * (2.0 * PI / num_points)
+		
+		var from_point = center + Vector2(cos(angle_from), sin(angle_from)) * radius
+		var to_point = center + Vector2(cos(angle_to), sin(angle_to)) * radius
+		
+		draw_line(from_point, to_point, color, line_width)
+	
+	# Optionally draw a line to the mouse position if it's within range
+	var mouse_pos = get_local_mouse_position()
+	var mouse_dir = mouse_pos.normalized()
+	var mouse_dist = mouse_pos.length()
+	
+	if mouse_dist > 0:
+		var end_point = mouse_dir * min(mouse_dist, radius)
+		draw_line(center, end_point, Color(1.0, 1.0, 1.0, 0.8), 1.5)
 func spawn_clone():
-	# Créer une instance du clone
+	# Create clone instance if it doesn't exist
 	if !clone:
 		clone = clone_scene.instantiate()
 		get_parent().add_child(clone)
 		clone.connect("fusion_requested", Callable(self, "_on_clone_fusion_requested"))
 	
-	# Obtenir la position de la souris dans l'espace mondial
+	# Get mouse position in world space
 	var world_mouse_position = get_global_mouse_position()
 	
-	# Calculer le vecteur de direction (sans normalisation d'abord pour le débogage)
+	# Calculate direction vector from player to mouse
 	var dir_vector = world_mouse_position - global_position
-	if dir_vector.length() < 0.001:
-		dir_vector = Vector2(1, 0)
 	
-	# Normaliser pour avoir une direction unitaire
+	# Handle case where mouse is exactly on player
+	if dir_vector.length() < 0.001:
+		dir_vector = Vector2(1, 0)  # Default direction
+	
+	# Normalize to get unit direction
 	var direction = dir_vector.normalized()
 	
-	 # S'assurer que le vecteur de vitesse est appliqué correctement
-	var distance = dir_vector.length()
-	var speed_multiplier = clamp(distance / 200.0, 0.5, 2.0)
-	var final_velocity = direction * max_speed * speed_multiplier
-   
-	# Activer le clone avec le vecteur de vitesse explicite
-	clone.global_position = global_position  # Forcer la position explicitement
-	clone.velocity = final_velocity          # Définir la vitesse directement
-	clone.activate(global_position, final_velocity.normalized(), self)
+	# Calculate new position at fixed distance (max_chain_length) from player
+	var spawn_position = global_position + (direction * max_chain_length)
+	
+	# Set clone position directly at the calculated position
+	clone.global_position = spawn_position
+	
+	# Set velocity to zero or minimal value if needed for animation
+	clone.velocity = Vector2.ZERO
+	
+	# Activate the clone at the new position
+	clone.activate(spawn_position, direction, self)
 	is_clone_active = true
 
 func start_drag_clone():
@@ -188,7 +224,8 @@ func complete_fusion():
 
 func _draw():
 	pass
-func _process(_delta):
+func process(_delta):
+	draw_chain_range_indicator()
 	# Forcer le rafraîchissement du dessin pour la chaîne
 	queue_redraw()
 

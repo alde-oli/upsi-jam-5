@@ -30,10 +30,6 @@ func activate(pos: Vector2, direction: Vector2, player_ref: Player):
 	
 	# S'assurer que la position est correctement définie
 	global_position = pos
-	var speed = max_speed
-	velocity = direction * speed
-	
-	# Activer le clone
 	visible = true
 	$CollisionShape2D.disabled = false
 	is_active = true
@@ -46,48 +42,15 @@ func _physics_process(delta):
 	if !is_active:
 		return
 
-	if is_fusing:
-		fusion_timer += delta
-		
-		# Mode fusion - se déplacer vers la cible
-		var direction = (target_position - global_position).normalized()
-		velocity = direction * fusion_speed
-		
-		# Vérifier si nous sommes arrivés à destination ou si le temps max est dépassé
-		if global_position.distance_to(target_position) < fusion_snap_distance || fusion_timer > fusion_max_time:
-			# Snap directement à la position cible pour éviter les blocages
-			global_position = target_position
-			emit_signal("fusion_requested", false)  # Informer que la fusion est complète
-			is_fusing = false
-			
-	elif is_being_dragged:
+	if is_being_dragged:
 		# Mode tiré par le joueur
 		var direction = (player.global_position - global_position).normalized()
 		velocity = direction * drag_force
-		
-	elif is_dragging_player:
-		# Mode tirer le joueur (la physique est gérée côté joueur)
-		pass
-		
 	else:
 		# Appliquer la gravité
-		velocity.y += gravity * delta
-		
-		# Appliquer la décélération en X
-		if abs(velocity.x) > 0:
-			var friction = deceleration * delta
-			if abs(velocity.x) <= friction:
-				velocity.x = 0
-			else:
-				velocity.x -= friction * sign(velocity.x)
-		
-		if is_on_floor():
-			velocity.x = 0
-			velocity.y = 0
-	
+		velocity.y += gravity * delta	
 	# Mettre à jour l'animation en fonction de l'état
 	update_animation()
-	
 	# Appliquer le mouvement
 	move_and_slide()
 
