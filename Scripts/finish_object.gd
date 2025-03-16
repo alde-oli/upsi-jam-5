@@ -1,7 +1,7 @@
 extends Area2D
 
 @export var max_level = 1
-var i = 1
+var i = 0
 
 func _on_body_entered(body):
 	if body is Player:

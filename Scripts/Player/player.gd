@@ -50,18 +50,16 @@ var facing_direction: float = 1.0  # 1 pour droite, -1 pour gauche
 
 func _ready():
 	# Initialiser les managers et la state machine
-	update_life_ui()
+
 	input_manager.init(self)
 	anim_manager.init(self)
 	state_machine.init(self, input_manager, anim_manager)
 
-func update_life_ui():
-	$Label.text = "life: " + str(life)
 
 func take_damage():
 	print("take damage")
 	life -= 1
-	update_life_ui()
+
 	if life < 1:
 		print(str(life))
 		get_tree().change_scene_to_file("res://Scenes/GameOver.tscn")
