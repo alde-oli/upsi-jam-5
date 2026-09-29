@@ -1,17 +1,7 @@
 <!-- YoRHa archive -->
-```
-▸ YoRHa // ARCHIVE — UPSI-JAM-5
-```
+<p align="center"><img src=".github/yorha-header.svg" width="100%" alt="YoRHa // ARCHIVE — upsi-jam-5 · Type: Game jam · team (5) · March 2025 · Stack: Godot 4 · GDScript · GitHub Actions · itch.io (butler) · Status: ■ COMPLETE · jam build"></p>
 
 A 2D platformer made in a few days during a game jam: the player splits off a clone, stays chained to it, and uses the chain to swing, pull and climb through three levels.
-
-![Godot](https://img.shields.io/badge/Godot-4.4-4e4b42?style=flat-square) ![GDScript](https://img.shields.io/badge/GDScript-dad4bb?style=flat-square)
-
-| UNIT DATA | |
-|---|---|
-| Type | Game jam · team (5) · March 2025 |
-| Stack | Godot 4 · GDScript · GitHub Actions · itch.io (butler) |
-| Status | ■ COMPLETE · jam build |
 
 ## ▸ Overview
 The core mechanic is a player/clone pair linked by a chain. A left click throws a clone toward the cursor at the chain's length. The chain then acts as a constraint: past its maximum length the player swings like a pendulum, and a jump at full extension launches them.
