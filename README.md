@@ -3,6 +3,8 @@
 
 A 2D platformer made in a few days during a game jam: the player splits off a clone, stays chained to it, and uses the chain to swing, pull and climb through three levels.
 
+▸ **Play it in the browser:** [Splitrun on itch.io](https://raphystoll.itch.io/splitrun) (UPSI JAM 5.0 entry)
+
 ## ▸ Overview
 The core mechanic is a player/clone pair linked by a chain. A left click throws a clone toward the cursor at the chain's length. The chain then acts as a constraint: past its maximum length the player swings like a pendulum, and a jump at full extension launches them.
 Movement runs on a small state machine (idle, run, jump, dash, wall slide, split, fusion), with input and animation handled by separate managers.
